@@ -183,18 +183,18 @@ u16 LCD_ReadPoint(u16 x,u16 y)
 }			 
 //LCD开启显示
 void LCD_DisplayOn(void)
-{					   
+{
 	if(lcddev.id==0X9341||lcddev.id==0X6804||lcddev.id==0X5310||lcddev.id==0X1963)LCD_WR_REG(0X29);	//开启显示
 	else if(lcddev.id==0X5510)LCD_WR_REG(0X2900);	//开启显示
 	else LCD_WriteReg(0X07,0x0173); 				 	//开启显示
-}	 
+}
 //LCD关闭显示
 void LCD_DisplayOff(void)
-{	   
+{
 	if(lcddev.id==0X9341||lcddev.id==0X6804||lcddev.id==0X5310||lcddev.id==0X1963)LCD_WR_REG(0X28);	//关闭显示
 	else if(lcddev.id==0X5510)LCD_WR_REG(0X2800);	//关闭显示
 	else LCD_WriteReg(0X07,0x0);//关闭显示 
-}   
+}
 //设置光标位置
 //Xpos:横坐标
 //Ypos:纵坐标
@@ -775,7 +775,7 @@ void LCD_Init(void)
 		FSMC_Bank1E->BWTR[6]|=10<<0;	//地址建立时间(ADDSET)为10个HCLK =60ns  	 
 		FSMC_Bank1E->BWTR[6]|=12<<8; 	//数据保存时间(DATAST)为6ns*13个HCLK=78ns
 	}
- 	printf(" LCD ID:%x\r\n",lcddev.id); //打印LCD ID   
+// 	printf(" LCD ID:%x\r\n",lcddev.id); //打印LCD ID   
 	if(lcddev.id==0X9341)	//9341初始化
 	{	 
 		LCD_WR_REG(0xCF);  

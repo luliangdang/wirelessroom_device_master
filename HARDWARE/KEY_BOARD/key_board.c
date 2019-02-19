@@ -15,25 +15,27 @@ const u8* kbd_tbl[16]={"1","2","3","←","4","5","6","OFF","7","8","9","OK","*","
 //x,y:界面起始坐标
 void key_load_ui(u16 x,u16 y)
 {
-	u16 i;
-	LCD_Clear(WHITE);
-	POINT_COLOR=RED;
-	LCD_DrawRectangle(x,y-40,x+200,y);
-	LCD_DrawRectangle(x,y,x+200,y+160);
-	LCD_DrawRectangle(x+50,y,x+100,y+160);
-	LCD_DrawRectangle(x+150,y,x+200,y+160);
-	LCD_DrawRectangle(x,y+40,x+200,y+80);
-	LCD_DrawRectangle(x,y+120,x+200,y+160);
+		u16 i;
+		LCD_Clear(WHITE);
+		POINT_COLOR=RED;
+		LCD_DrawRectangle(x,y-40,x+200,y);
+		LCD_DrawRectangle(x,y,x+200,y+160);
+		LCD_DrawRectangle(x+50,y,x+100,y+160);
+		LCD_DrawRectangle(x+150,y,x+200,y+160);
+		LCD_DrawRectangle(x,y+40,x+200,y+80);
+		LCD_DrawRectangle(x,y+120,x+200,y+160);
 
-	POINT_COLOR=BLUE;
-	for(i=0;i<16;i++)
-	{
-		Show_Str_Mid(x+(i%4)*50,y+10+40*(i/4),(u8*)kbd_tbl[i],16,60);
-	}
-	Show_Str(250,20,80,16,(u8 *)"1教101",16,0);
-	POINT_COLOR=BLUE;//设置字体为蓝色 
- 	LCD_ShowString(230,90,100,16,16,(u8 *)"Temp:  C");
- 	LCD_ShowString(230,110,100,16,16,(u8 *)"Humi:  %");
+		POINT_COLOR=BLUE;
+		for(i=0;i<16;i++)
+		{
+			Show_Str_Mid(x+(i%4)*50,y+10+40*(i/4),(u8*)kbd_tbl[i],16,60);
+		}
+		Show_Str(250,20,80,16,(u8 *)"1教101",16,0);
+		POINT_COLOR=BLUE;//设置字体为蓝色 
+//		LCD_ShowString(230,90,100,16,16,(u8 *)"Temp:   C");
+		Show_Str(230,90,100,16,(u8 *)"温度:   度",16,0);
+		Show_Str(230,110,100,16,(u8 *)"湿度:   %",16,0);
+//		LCD_ShowString(230,110,100,16,16,(u8 *)"Humi:   %");
 }
 
 //按键状态设置

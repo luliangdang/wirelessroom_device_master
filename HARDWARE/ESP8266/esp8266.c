@@ -11,6 +11,8 @@
 #include "ff.h"
 #include "rtc.h"
 #include "malloc.h"
+#include "led.h"
+#include "text.h"
 
 FIL fdsts_recive;
 UINT readnum;
@@ -101,33 +103,38 @@ void u2_printf(char* fmt,...)
     }
 }
 
-
+u8 msg_flag;
 //串口2中断服务函数
 void USART2_IRQHandler(void)
 {
-    u8 res;
-    if(USART_GetITStatus(USART2, USART_IT_RXNE) != RESET)//接收到数据
-    {
-			res =USART_ReceiveData(USART2);
-			if((USART2_RX_STA&(1<<15))==0)//接收完的一批数据,还没有被处理,则不再接收其他数据
+	u8 res;
+	if(USART_GetITStatus(USART2, USART_IT_RXNE) != RESET)//接收到数据
+	{
+		res =USART_ReceiveData(USART2);
+		if((USART2_RX_STA&(1<<15))==0)//接收完的一批数据,还没有被处理,则不再接收其他数据
+		{
+			if(start_flag==0)
 			{
-				if(start_flag==0)
+				if(USART2_RX_STA<USART2_MAX_RECV_LEN)
 				{
-					if(USART2_RX_STA<USART2_MAX_RECV_LEN)	//还可以接收数据
-					{
-							USART2_RX_BUF[USART2_RX_STA++] = res;
-					}
-				}
-				else if(start_flag==1)
-				{
-					if(res=='@')	USART2_RX_STA = 0;
-					if(USART2_RX_STA<USART2_MAX_RECV_LEN)
-					{
-						USART2_RX_BUF[USART2_RX_STA++] = res;
-					}
+					USART2_RX_BUF[USART2_RX_STA++] = res;
 				}
 			}
-    }
+			else if(start_flag==1)
+			{
+				if(res=='@')
+				{
+					USART2_RX_STA&=0x0000;
+					msg_flag = 1;
+				}
+				if(USART2_RX_STA<USART2_MAX_RECV_LEN)
+				{
+					USART2_RX_BUF[USART2_RX_STA++] = res;
+//					USART2_RX_STA++;
+				}
+			}
+		}
+	}
 }
 
 //发送一条AT指令，并检测是否收到指定的应答
@@ -153,6 +160,7 @@ s8 sendAT(char *sendStr,char *searchStr,u32 outTime)
         u2_printf(sendStr);//发送AT指令
         u2_printf("\r\n");//发送回车换行
     }
+		delay_us(500);
     if(searchStr && outTime)//当searchStr和outTime不为0时才等待应答
     {
         while((--outTime)&&(res == 0))//等待指定的应答或超时时间到来
@@ -173,6 +181,7 @@ s8 sendAT(char *sendStr,char *searchStr,u32 outTime)
             ret = 0;
         }
     }
+		printf("%s",USART2_RX_BUF);
     delay_ms(50);
 		cleanReceiveData();		//清空接收数据缓存
     return ret;
@@ -216,30 +225,134 @@ char * my_strstr(char *FirstAddr,char *searchStr)
     return 0;
 }
 
+//检测网络状态
+void Check_Status(void)
+{
+		u8 state;
+		printf("开始检测网络状态\r\n");
+		if(sendAT("AT","OK",1000)==0)
+		{
+				u2_printf("AT+CIPSTATUS\r\n");
+				delay_ms(25);
+				printf("%s",USART2_RX_BUF);
+				printf("%c",USART2_RX_BUF[7]);
+				state = USART2_RX_BUF[7] - '0';
+				printf("网络状态：%d\r\n",state);
+				switch(state)
+				{
+						case 2:	
+							printf("已连接路由器，未连接服务器\r\n");
+							connect_state = 1;
+							LED0 = 1;
+						break;
+						case 3:
+							printf("已连接服务器\r\n");
+							connect_state = 0;
+						break;
+						case 4:
+							printf("与服务器断开连接\r\n");
+							connect_state = 1;
+							LED0 = 1;
+						break;
+						case 5:
+							printf("与路由器断开连接\r\n");
+							connect_state = 2;
+							LED0 = 1;
+						break;
+						default:
+							printf("未知故障\r\n");
+							connect_state = 3;
+							LED0 = 1;
+						break;
+				}
+		}
+		else 
+		{
+				printf("ESP8266模块异常\r\n");
+				state = 4;
+		}
+		printf("网络状态检测完毕\r\n");
+		cleanReceiveData();
+}
+
+
 char SSID[] = {"Kiven"};		//路由器SSID
 char password[] = {"asd123456"};	//路由器密码
 //char ipaddr[]= {"111.231.90.29"};//IP地址
-//char ipaddr[] = {"47.100.28.6"};
-char ipaddr[]= {"172.20.10.3"};//IP地址
+char ipaddr[] = {"47.100.28.6"};
+//char ipaddr[]= {"172.20.10.3"};//IP地址
 char port[]= {"8086"};				//端口号
+
+void esp8266_reinit(u8 state)
+{
+		char past[50];
+		switch(state)
+		{
+				case 4:
+					sendAT("AT+RST","ready",3000);
+				case 3:
+					sendAT("AT+RST","ready",3000);
+					sendAT("AT","OK",1000);
+				case 2:
+					if(sendAT("AT+CWMODE=1","OK",1000)==0)
+					{
+						printf("设置为STA模式\r\n");
+					}
+					sprintf(past,"AT+CWJAP_DEF=\"%s\",\"%s\"",SSID,password);
+					sendAT(past,"OK",2000);
+				case 1:
+					sprintf((char *)past,"AT+CIPSTART=\"TCP\",\"%s\",%s",ipaddr,port);
+					
+					if(sendAT(past,"OK",2000)==0)
+					{
+							printf("服务器连接成功\r\n");
+							LED0 = 0;
+							connect_state = 0;
+							sprintf(past,"@D1%04d",Device_ID);
+							u2_printf("+++");
+							delay_ms(25);
+							u2_printf("AT+CIPMODE=1\r\n");
+							delay_ms(15);
+							u2_printf("AT+CIPSEND\r\n");
+							delay_ms(15);
+							u2_printf("%s\r\n",past);
+							delay_ms(25);
+							u2_printf("+++");
+							delay_ms(15);
+					}
+					else
+					{
+						printf("服务器连接失败\r\n");
+						LED0 = 1;
+						connect_state = 1;
+					}
+				case 0:
+					printf("服务器重连成功\r\n");
+				break;
+		}
+		cleanReceiveData();
+}
 
 //ESP8266模块初始化
 void esp8266_Init(void)
 {
 //    u8 i;
 //    s8 ret;
-    char past[100];			//路由器信息
+    char past[50];			//路由器信息
     usart2_Init(115200);	//初始化串口2波特率为9600
     cleanReceiveData();		//清空接收数据缓存
     sendAT("AT+RST","ready",3000);
+		LED0 = 1;
     delay_ms(1000);
-
+		LED0 = 0;
 		printf("开始初始化\r\n");
     delay_ms(1000);		//等待模块上电稳定
     
     printf("初始化成功\r\n");
 		LCD_ShowString(20,20,200,16,16,"ESP8266 init success!");
+		LED0 = 1;
 		delay_ms(1000);		//等待模块上电稳定
+		sendAT("ATE0","OK",1000);
 		if(sendAT("ATE0","OK",1000)==0)
 		{
 			printf("关闭回显成功\r\n");
@@ -251,24 +364,15 @@ void esp8266_Init(void)
 		
 		LCD_ShowString(20,40,200,16,16,(u8 *)"ESP8266 set at STA mode");
 		
-    sprintf((char *)past,"AT+CWJAP=\"%s\",\"%s\",1,4",SSID,password);
-//		printf("%s\r\n",past);
-    if(sendAT(past,"OK",2000)==0)
-    {
-        printf("连接路由器成功\r\n");
-				LCD_ShowString(20,60,200,16,16,(u8 *)"Connected router Succese");
-    }
-		else
-		{
-				printf("连接路由器失败\r\n");
-				LCD_ShowString(20,60,200,16,16,(u8 *)"Connection router failed");
-//				while(1);		//等待重启
-		}
+		printf("连接路由器成功\r\n");
+		LCD_ShowString(20,60,200,16,16,(u8 *)"Connected router Succese");
+
 		sprintf((char *)past,"AT+CIPSTART=\"TCP\",\"%s\",%s",ipaddr,port);
-//		printf("%s\r\n",past);
+
 		if(sendAT(past,"OK",2000)==0)
 		{
 				printf("服务器连接成功\r\n");
+				LED0 = 0;
 				LCD_ShowString(20,80,200,16,16,(u8 *)"Server connected");
 				connect_state = 0;
 				sprintf(past,"@D1%04d",Device_ID);
@@ -286,6 +390,7 @@ void esp8266_Init(void)
 		else
 		{
 			printf("服务器连接失败\r\n");
+			LED0 = 1;
 			LCD_ShowString(20,80,200,16,16,(u8 *)"Server disconnected");
 			connect_state = 1;
 		}
@@ -340,6 +445,14 @@ void decodeData(void)
 				}
 				switch_CMD();
 		}
+		else
+		{
+				LED1 = 1;
+				delay_ms(50);
+				LED1 = 0;
+				delay_ms(50);
+				LED1 = 1;
+		}
 		cleanReceiveData();		//清空接收数据缓存
 }
 
@@ -348,13 +461,13 @@ void decodeData(void)
 *入口参数：
 *出口参数：
 *********************************************************************/
-void sendBack(u8 CMD_TYPE,ErrorStatus error)
+void sendBack(u8 CMD_TYPE,u8 error)
 {
 		char past[100];
 		char date[20];
 		memset(past,0,100);
 		memset(date,0,20);
-		sprintf(past,"@D%1d%04d%d",CMD_TYPE,Device_ID,error);
+		sprintf(past,"@D%1d%04d%1d",CMD_TYPE,Device_ID,error);
 //		sprintf(date,"%4d-%02d-%02d %02d:%02d:%02d",calendar.w_year,
 //																								calendar.w_month,
 //																								calendar.w_date,
@@ -412,8 +525,17 @@ void SendOnline(void)
 		printf("%04d",device);
 		if(device==Device_ID)
 		{
+				LED1 = 1;
 				ClearnSDCache();         /*清空SD卡缓存信息*/
 				sendBack(CMD_ONLINE,1);
+		}
+		else
+		{
+				LED1 = 1;
+				delay_ms(50);
+				LED1 = 0;
+				delay_ms(50);
+				LED1 = 1;
 		}
 }
 
@@ -426,6 +548,7 @@ void SendOnline(void)
 void SetTime(void)
 {
 		u16 year;
+		u8 CMD;
 		u8 mon,day,hour,min,sec,week;
 		ErrorStatus error;
 		u8 device_id[6];
@@ -436,10 +559,18 @@ void SetTime(void)
 		//读取设备号
 		if(f_open(&fdsts_recive,"Receive.txt",FA_READ)==FR_OK)
     {
-        f_lseek(&fdsts_recive,3);                          			//移动文件指针
+        f_lseek(&fdsts_recive,3);                   //移动文件指针
         f_read(&fdsts_recive,device_id,4,&readnum);	//读取设定时间
         f_close(&fdsts_recive);
     }
+		//读取控制命令
+		if(f_open(&fdsts_recive,"Receive.txt",FA_READ)==FR_OK)
+    {
+        f_lseek(&fdsts_recive,21);              //移动文件指针
+        f_read(&fdsts_recive,&CMD,1,&readnum);	//读取设定时间
+        f_close(&fdsts_recive);
+    }
+		CMD -= '0';
 //		printf("device_id:%s\r\n",device_id);
 		for(u8 i=0;i<4;i++)
 		{
@@ -460,7 +591,7 @@ void SetTime(void)
 				{
 						Gettime.time_arrary[i] -= 48;
 				}
-				ClearnSDCache();            								//清空SD卡缓存信息
+				
 				year=(Gettime.TIME.year[0])*1000;     			//计算时间
 				year+=(Gettime.TIME.year[1])*100;
 				year+=(Gettime.TIME.year[2])*10;
@@ -485,15 +616,40 @@ void SetTime(void)
 				
 				if(year>2018&&mon<13&&day<32&&hour<24&&min<60&&sec<60)
 				{
-						error = RTC_Set_Time(hour,min,sec,RTC_H12_AM);	//设置时间
-						printf("set-error:%d\r\n",error);
-						error = RTC_Set_Date(year-2000,mon,day,week);		//设置日期
-						printf("set-error:%d\r\n",error);
-						
-						RTC_Get();
+						switch(CMD)
+						{
+							case 1:
+							{
+									error = RTC_Set_Time(hour,min,sec,RTC_H12_AM);	//设置时间
+									printf("set-error:%d\r\n",error);
+									error = RTC_Set_Date(year-2000,mon,day,week);		//设置日期
+									printf("set-error:%d\r\n",error);
+									
+									RTC_Get();
+									LED1 = 1;
+									sendBack(CMD_SET_TIME,error);		//发送时间设置应答
+									break;
+							}
+							case 2:
+							{
+									printf("设置闹钟A\r\n");
+									RTC_Set_AlarmA(week,hour,min,sec);
+									sendBack(CMD_SET_TIME,error);		//发送时间设置应答
+									break;
+							}
+						}
 				}
-				sendBack(CMD_SET_TIME,error);		//发送时间设置应答
 		}
+		else
+		{
+				LED1 = 1;
+				delay_ms(50);
+				LED1 = 0;
+				delay_ms(50);
+				LED1 = 1;
+				sendBack(CMD_SET_TIME,0);		//发送时间设置应答
+		}
+		ClearnSDCache();            								//清空SD卡缓存信息
 }
 
 /*********************************************************************
@@ -532,6 +688,8 @@ void OpenDoor(void)
 						f_close(&fdsts_recive);
 				}
 				CMD -= '0';
+				TIM_SetCounter(TIM3, 0);
+				LCD_LED = 1;
 				printf("CMD:%d\r\n",CMD);
 				switch(CMD)
 				{
@@ -543,20 +701,31 @@ void OpenDoor(void)
 										f_read(&fdsts_recive,&userid,11,&readnum);						//读取指令
 										f_close(&fdsts_recive);
 								}
+								DS0 = 1;
+								DS1 = 1;
+								DR0 = 0;
+								TIM_Cmd(TIM4, ENABLE);
 								printf("userid:%s\r\n",userid);
 								printf("正常开门\r\n");
-//								LCD_ShowString();
+								LCD_Fill(230,150,320,180,WHITE);
+								Show_Str(230,150,100,16,(u8 *)"欢迎光临！",16,0);
+								sendBack(CMD_OPEN,0);
 								break;
 						}
 						case 1:		//错误代码1--未注册
 						{
 								printf("尚未注册\r\n");
+								LCD_Fill(230,150,320,180,WHITE);
+								Show_Str(230,150,100,16,(u8 *)"尚未注册！",16,0);
+								sendBack(CMD_OPEN,1);
 								break;
 						}
 						case 2:		//错误代码2--未预约
 						{
 								printf("尚未预约\r\n");
-//								LCD_ShowString();
+								LCD_Fill(230,150,320,180,WHITE);
+								Show_Str(230,150,100,16,(u8 *)"尚未预约！",16,0);
+								sendBack(CMD_OPEN,2);
 								break;
 						}
 						case 3:		//错误代码3--未到预约时间
@@ -569,6 +738,9 @@ void OpenDoor(void)
 								}
 								printf("userid:%s\r\n",userid);
 								printf("未到预约时间\r\n");
+								LCD_Fill(230,150,320,180,WHITE);
+								Show_Str(230,150,100,16,(u8 *)"未到预约时间！",16,0);
+								sendBack(CMD_OPEN,3);
 								break;
 						}
 						case 4:		//错误代码4--验证码过期
@@ -581,11 +753,23 @@ void OpenDoor(void)
 								}
 								printf("userid:%s\r\n",userid);
 								printf("预约已过期\r\n");
+								LCD_Fill(230,150,320,180,WHITE);
+								Show_Str(230,150,100,16,(u8 *)"预约已失效！",16,0);
+								sendBack(CMD_OPEN,4);
 								break;
 						}
 						default:break;
 				}
-				sendBack(CMD_OPEN,1);
+				LED1 = 1;
+		}
+		else
+		{
+				LED1 = 1;
+				delay_ms(50);
+				LED1 = 0;
+				delay_ms(50);
+				LED1 = 1;
+				sendBack(CMD_OPEN,5);
 		}
 }
 
@@ -608,11 +792,24 @@ void SetNet(void)
 		printf("%s\r\n",device_id);
 		for(u8 i=0;i<4;i++)
 		{
-				device_id[i] = device_id[i]-'\0';
+				device_id[i] = device_id[i]-48;
 				device = device*10+device_id[i];
 		}
 		printf("deviceid:%4d\r\n",device);
-		sendBack(CMD_CONNECT,1);
+		if(device == Device_ID)
+		{
+				LED0 = 1;
+				sendBack(CMD_CONNECT,1);
+		}
+		else
+		{
+				LED1 = 1;
+				delay_ms(50);
+				LED1 = 0;
+				delay_ms(50);
+				LED1 = 1;
+				sendBack(CMD_CONNECT,0);
+		}
 }
 
 /*********************************************************************
@@ -650,7 +847,17 @@ void switch_CMD(void)
 //				case CMD_MEMBER:				{	 	new_member();		 			break;	}	//新建人员信息
 //				case CMD_CHECK_PHOTO:		{	 	check_photo();		 		break;	}	//查寻图片是否存在
 
-        default:{break;}
+        default:
+				{
+						LED1 = 1; 
+						delay_ms(50);
+						LED1 = 0; 
+						delay_ms(50);	
+						LED1 = 1; 
+						delay_ms(50);
+						sendBack(CMD_ONLINE,1);
+						break;
+				}
     }
 		ClearnSDCache();            								//清空SD卡缓存信息
 }

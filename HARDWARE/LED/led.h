@@ -17,8 +17,20 @@
 
 
 //LED端口定义
-#define LED0 PFout(9)	// DS0
-#define LED1 PFout(10)	// DS1	 
+/***************************************
+*LED0闪烁一次表示初始化成功
+*LED0亮起表示连接服务器成功
+*LED1亮起接收数据
+*LED1亮起后熄灭表示正常处理数据
+*LED1闪烁两次表示接收数据有误
+***************************************/
+#define LED0 PFout(9)		// LED0		
+#define LED1 PFout(10)	// LED1
 
-void LED_Init(void);//初始化		 				    
+#define DS0	 PFout(4)		//Light0
+#define	DS1  PFout(5)		//Light1
+#define DR0  PFout(6)		//Door
+
+void LED_Init(void);//初始化
+
 #endif

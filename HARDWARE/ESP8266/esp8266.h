@@ -38,6 +38,7 @@ extern u8  USART2_TX_BUF[USART2_MAX_SEND_LEN]; 		//发送缓冲,最大USART3_MAX_SEND_
 extern vu16 USART2_RX_STA;   											//接收数据状态
 extern u8 connect_state;
 extern u8 start_flag;
+extern u8 msg_flag;
 
 void usart2_Init(u32 bound);	//串口2初始化
 void u2_printf(char* fmt,...);		//串口2发送数据函数
@@ -46,9 +47,11 @@ void esp8266_Init(void);			//esp8266初始化
 extern s8 sendAT(char *sendStr,char *searchStr,u32 outTime);//发送AT指令函数
 extern void cleanReceiveData(void);    //清除接收器数据
 extern char * my_strstr(char *FirstAddr,char *searchStr);	//strstr函数
+void Check_Status(void);		//检测网络状态
+void esp8266_reinit(u8 state);//模块重启动
 s8 TCP_Server(void);		//配置服务器
 void decodeData(void);	//解析服务器信息
-void sendBack(u8 CMD_TYPE,ErrorStatus error);	//发送回复应答
+void sendBack(u8 CMD_TYPE,u8 error);	//发送回复应答
 
 void ClearnSDCache(void);		//清除SD缓存
 void SendOnline(void);			//发送在线应答

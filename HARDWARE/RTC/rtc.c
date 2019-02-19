@@ -49,7 +49,6 @@ ErrorStatus RTC_Set_Time(u8 hour,u8 min,u8 sec,u8 ampm)
 //       ERROR(0),进入初始化模式失败 
 ErrorStatus RTC_Set_Date(u8 year,u8 month,u8 date,u8 week)
 {
-	
 	RTC_DateTypeDef RTC_DateTypeInitStructure;
 	RTC_DateTypeInitStructure.RTC_Date=date;
 	RTC_DateTypeInitStructure.RTC_Month=month;
@@ -104,6 +103,7 @@ void RTC_Set_AlarmA(u8 week,u8 hour,u8 min,u8 sec)
 	EXTI_InitTypeDef   EXTI_InitStructure;
 	RTC_AlarmTypeDef RTC_AlarmTypeInitStructure;
 	RTC_TimeTypeDef RTC_TimeTypeInitStructure;
+	RTC_DateTypeDef RTC_DateTypeInitStructure;
 	
 	RTC_AlarmCmd(RTC_Alarm_A,DISABLE);//关闭闹钟A 
 	
@@ -114,12 +114,13 @@ void RTC_Set_AlarmA(u8 week,u8 hour,u8 min,u8 sec)
   
 	RTC_AlarmTypeInitStructure.RTC_AlarmDateWeekDay=week;//星期
 	RTC_AlarmTypeInitStructure.RTC_AlarmDateWeekDaySel=RTC_AlarmDateWeekDaySel_WeekDay;//按星期闹
-	RTC_AlarmTypeInitStructure.RTC_AlarmMask=RTC_AlarmMask_None;//精确匹配星期，时分秒
+	RTC_AlarmTypeInitStructure.RTC_AlarmMask=RTC_AlarmMask_DateWeekDay;//精确匹配星期，时分秒
 	RTC_AlarmTypeInitStructure.RTC_AlarmTime=RTC_TimeTypeInitStructure;
   RTC_SetAlarm(RTC_Format_BIN,RTC_Alarm_A,&RTC_AlarmTypeInitStructure);
  
 	
 	RTC_ClearITPendingBit(RTC_IT_ALRA);//清除RTC闹钟A的标志
+	RTC_ClearFlag(RTC_FLAG_ALRAF);//清除中断标志
   EXTI_ClearITPendingBit(EXTI_Line17);//清除LINE17上的中断标志位 
 	
 	RTC_ITConfig(RTC_IT_ALRA,ENABLE);//开启闹钟A中断
@@ -150,55 +151,61 @@ void RTC_Set_AlarmA(u8 week,u8 hour,u8 min,u8 sec)
 //cnt:自动重装载值.减到0,产生中断.
 void RTC_Set_WakeUp(u32 wksel,u16 cnt)
 {
-	EXTI_InitTypeDef   EXTI_InitStructure;
-	
-	RTC_WakeUpCmd(DISABLE);//关闭WAKE UP
-	
-	RTC_WakeUpClockConfig(wksel);//唤醒时钟选择
-	
-	RTC_SetWakeUpCounter(cnt);//设置WAKE UP自动重装载寄存器
-	
-	
-	RTC_ClearITPendingBit(RTC_IT_WUT); //清除RTC WAKE UP的标志
-  EXTI_ClearITPendingBit(EXTI_Line22);//清除LINE22上的中断标志位 
-	 
-	RTC_ITConfig(RTC_IT_WUT,ENABLE);//开启WAKE UP 定时器中断
-	RTC_WakeUpCmd( ENABLE);//开启WAKE UP 定时器　
-	
-	EXTI_InitStructure.EXTI_Line = EXTI_Line22;//LINE22
-  EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;//中断事件
-  EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising; //上升沿触发 
-  EXTI_InitStructure.EXTI_LineCmd = ENABLE;//使能LINE22
-  EXTI_Init(&EXTI_InitStructure);//配置
- 
- 
-	NVIC_InitStructure.NVIC_IRQChannel = RTC_WKUP_IRQn; 
-  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x02;//抢占优先级1
-  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x02;//子优先级2
-  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;//使能外部中断通道
-  NVIC_Init(&NVIC_InitStructure);//配置
+		EXTI_InitTypeDef   EXTI_InitStructure;
+		
+		RTC_WakeUpCmd(DISABLE);//关闭WAKE UP
+		
+		RTC_WakeUpClockConfig(wksel);//唤醒时钟选择
+		
+		RTC_SetWakeUpCounter(cnt);//设置WAKE UP自动重装载寄存器
+		
+		
+		RTC_ClearITPendingBit(RTC_IT_WUT); //清除RTC WAKE UP的标志
+		EXTI_ClearITPendingBit(EXTI_Line22);//清除LINE22上的中断标志位 
+		 
+		RTC_ITConfig(RTC_IT_WUT,ENABLE);//开启WAKE UP 定时器中断
+		RTC_WakeUpCmd( ENABLE);//开启WAKE UP 定时器　
+		
+		EXTI_InitStructure.EXTI_Line = EXTI_Line22;//LINE22
+		EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;//中断事件
+		EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising; //上升沿触发 
+		EXTI_InitStructure.EXTI_LineCmd = ENABLE;//使能LINE22
+		EXTI_Init(&EXTI_InitStructure);//配置
+		
+		NVIC_InitStructure.NVIC_IRQChannel = RTC_WKUP_IRQn; 
+		NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x02;//抢占优先级1
+		NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x02;//子优先级2
+		NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;//使能外部中断通道
+		NVIC_Init(&NVIC_InitStructure);//配置
 }
 
 //RTC闹钟中断服务函数
 void RTC_Alarm_IRQHandler(void)
 {    
-	if(RTC_GetFlagStatus(RTC_FLAG_ALRAF)==SET)//ALARM A中断?
-	{
-		RTC_ClearFlag(RTC_FLAG_ALRAF);//清除中断标志
-		RTC_AlarmCmd(RTC_Alarm_A, DISABLE);
-	}
-	EXTI_ClearITPendingBit(EXTI_Line17);	//清除中断线17的中断标志 											 
+		if(RTC_GetFlagStatus(RTC_FLAG_ALRAF)==SET)//ALARM A中断?
+		{
+				RTC_ClearFlag(RTC_FLAG_ALRAF);//清除中断标志
+//				RTC_AlarmCmd(RTC_Alarm_A, ENABLE);
+				printf("闹钟响铃\r\n");
+				DS0 = 0;
+				DS1 = 0;
+				DR0 = 0;
+				TIM_SetCounter(TIM4, 0);
+				TIM_Cmd(TIM4, ENABLE);  //使能TIMx
+		}
+		EXTI_ClearITPendingBit(EXTI_Line17);	//清除中断线17的中断标志 											 
 }
 
 //RTC WAKE UP中断服务函数
 void RTC_WKUP_IRQHandler(void)
-{    
-	if(RTC_GetFlagStatus(RTC_FLAG_WUTF)==SET)//WK_UP中断?
-	{
-		RTC_ClearFlag(RTC_FLAG_WUTF);	//清除中断标志
-		LED1=!LED1; 
-	}
-	EXTI_ClearITPendingBit(EXTI_Line22);//清除中断线22的中断标志 								
+{
+		if(RTC_GetFlagStatus(RTC_FLAG_WUTF)==SET)//WK_UP中断?
+		{
+				RTC_ClearFlag(RTC_FLAG_WUTF);	//清除中断标志
+				RTC_Get();
+//				LED1=!LED1; 
+		}
+		EXTI_ClearITPendingBit(EXTI_Line22);//清除中断线22的中断标志 								
 }
 u8 const table_week[12]={0,3,3,6,1,4,6,2,5,0,3,5}; //月修正数据表	  
 //获得现在是星期几
@@ -207,18 +214,18 @@ u8 const table_week[12]={0,3,3,6,1,4,6,2,5,0,3,5}; //月修正数据表
 //返回值：星期号																						 
 u8 RTC_Get_Week(u16 year,u8 month,u8 day)
 {
-	u16 temp2;
-	u8 yearH,yearL;
-	
-	yearH=year/100;	yearL=year%100; 
-	// 如果为21世纪,年份数加100  
-	if (yearH>19)yearL+=100;
-	// 所过闰年数只算1900年之后的  
-	temp2=yearL+yearL/4;
-	temp2=temp2%7; 
-	temp2=temp2+day+table_week[month-1];
-	if (yearL%4==0&&month<3)temp2--;
-	return(temp2%7);
+		u16 temp2;
+		u8 yearH,yearL;
+		
+		yearH=year/100;	yearL=year%100; 
+		// 如果为21世纪,年份数加100  
+		if (yearH>19)yearL+=100;
+		// 所过闰年数只算1900年之后的  
+		temp2=yearL+yearL/4;
+		temp2=temp2%7; 
+		temp2=temp2+day+table_week[month-1];
+		if (yearL%4==0&&month<3)temp2--;
+		return(temp2%7);
 }
 
 //读取实时时间与日期
@@ -229,7 +236,7 @@ void RTC_Get(void)
 		RTC_DateTypeDef RTC_DateStruct;
 		TIM_Cmd(TIM3, DISABLE);
 		//读取RTC寄存器
-		RTC_GetTime(RTC_Format_BIN,&RTC_TimeStruct);
+		RTC_GetTime(RTC_Format_BIN, &RTC_TimeStruct);
 		RTC_GetDate(RTC_Format_BIN, &RTC_DateStruct);
 		//复制时间信息至结构体
 		calendar.hour = RTC_TimeStruct.RTC_Hours;
@@ -239,9 +246,9 @@ void RTC_Get(void)
 		calendar.w_month = RTC_DateStruct.RTC_Month;
 		calendar.w_date = RTC_DateStruct.RTC_Date;
 		calendar.week = RTC_DateStruct.RTC_WeekDay;
-		sprintf((char *)tbuf,"%4d-%2d-%2d\r\n",calendar.w_year,calendar.w_month,calendar.w_date);
+		sprintf((char *)tbuf,"%4d-%02d-%02d\r\n",calendar.w_year,calendar.w_month,calendar.w_date);
 		LCD_ShowString(230,50,100,16,16,tbuf);
-		sprintf((char *)tbuf,"%2d:%2d:%2d\r\n",calendar.hour,calendar.min,calendar.sec);
+		sprintf((char *)tbuf,"%2d:%02d:%02d\r\n",calendar.hour,calendar.min,calendar.sec);
 		LCD_ShowString(230,70,100,16,16,tbuf);
 //		printf("Date:%4d-%2d-%2d\r\n",calendar.w_year,calendar.w_month,calendar.w_date);
 //		printf("time:%2d:%2d:%2d\r\n",calendar.hour,calendar.min,calendar.sec);

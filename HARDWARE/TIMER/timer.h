@@ -14,6 +14,10 @@
 //All rights reserved									  
 //////////////////////////////////////////////////////////////////////////////////
 
+extern u8 dht11_flag;
+extern u8 esp_flag;
+
 void TIM3_Int_Init(u16 arr,u16 psc);
+void TIM4_Int_Init(u16 arr,u16 psc);
  
 #endif
