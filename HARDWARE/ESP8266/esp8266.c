@@ -463,9 +463,9 @@ void decodeData(void)
 *********************************************************************/
 void sendBack(u8 CMD_TYPE,u8 error)
 {
-		char past[100];
+		char past[50];
 		char date[20];
-		memset(past,0,100);
+		memset(past,0,50);
 		memset(date,0,20);
 		sprintf(past,"@D%1d%04d%1d",CMD_TYPE,Device_ID,error);
 //		sprintf(date,"%4d-%02d-%02d %02d:%02d:%02d",calendar.w_year,

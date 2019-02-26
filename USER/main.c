@@ -216,6 +216,7 @@ int main(void)
 				{
 						USART2_RX_STA = 0;
 						printf("%s",USART2_RX_BUF);
+						sendBack(CMD_ONLINE,0);
 				}
 				//定时读取温湿度
 				if(dht11_flag==1)

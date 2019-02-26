@@ -69,12 +69,7 @@ void TIM3_IRQHandler(void)   //TIM3ÖÐ¶Ï
 		if(i==240)
 		{
 			i=0;
-			count++;
-			if(count==240)
-			{
-				count = 0;
-				esp_flag = 1;
-			}
+			esp_flag = 1;
 			LCD_LED = 0;
 		}
 	}
