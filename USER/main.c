@@ -26,45 +26,45 @@ extern u8 dht11_flag;
 extern u8 esp_flag;
 extern u8 msg_flag;
 
-//Ö÷º¯Êı
+//ä¸»å‡½æ•°
 int main(void)
 {
 		u8 res;
 		u8 key;
-		u8 inputlen;		//ÊäÈë³¤¶È
-		u8 inputstr[7];		//×î´óÊäÈë6¸ö×Ö·û+½áÊø·û
-		char past[100];			//Â·ÓÉÆ÷ĞÅÏ¢
-		char ipaddr[] = {"47.100.28.6"};
-		char port[]= {"8086"};				//¶Ë¿ÚºÅ
+		u8 inputlen;		//è¾“å…¥é•¿åº¦
+		u8 inputstr[7];		//æœ€å¤§è¾“å…¥6ä¸ªå­—ç¬¦+ç»“æŸç¬¦
+		char past[50];			//è·¯ç”±å™¨ä¿¡æ¯
+		char ipaddr[] = {"***.***.***.**"};
+		char port[]= {"****"};				//ç«¯å£å·
 		
 		start_flag = 0;
 		dht11_flag = 0;
 		esp_flag = 0;
-		u8 temperature;	//ÎÂ¶È
-		u8 humidity; 		//Êª¶È
+		u8 temperature;	//æ¸©åº¦
+		u8 humidity; 		//æ¹¿åº¦
 		
-		NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);//ÉèÖÃÏµÍ³ÖĞ¶ÏÓÅÏÈ¼¶·Ö×é2
+		NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);//è®¾ç½®ç³»ç»Ÿä¸­æ–­ä¼˜å…ˆçº§åˆ†ç»„2
 		delay_init(168);
 		uart_init(115200);
-		LED_Init();					//³õÊ¼»¯LED  
-		LCD_Init();					//LCD³õÊ¼»¯  
-		KEY_Init();					//°´¼ü³õÊ¼»¯
-		My_RTC_Init();			//RTCÊ±ÖÓ³õÊ¼»¯
-//		RTC_Set_WakeUp(RTC_WakeUpClock_CK_SPRE_16bits,0);		//ÅäÖÃWAKE UPÖĞ¶Ï,1ÃëÖÓÖĞ¶ÏÒ»´Î
-		DHT11_Init();				//DHT11³õÊ¼»¯
+		LED_Init();					//åˆå§‹åŒ–LED  
+		LCD_Init();					//LCDåˆå§‹åŒ–  
+		KEY_Init();					//æŒ‰é”®åˆå§‹åŒ–
+		My_RTC_Init();			//RTCæ—¶é’Ÿåˆå§‹åŒ–
+//		RTC_Set_WakeUp(RTC_WakeUpClock_CK_SPRE_16bits,0);		//é…ç½®WAKE UPä¸­æ–­,1ç§’é’Ÿä¸­æ–­ä¸€æ¬¡
+		DHT11_Init();				//DHT11åˆå§‹åŒ–
 		
-		tp_dev.init();			//´¥ÃşÆÁ³õÊ¼»¯
-//		SD_Init();					//³õÊ¼»¯SDIO½Ó¿Ú
-		my_mem_init(SRAMIN);	//³õÊ¼»¯ÄÚ²¿ÄÚ´æ³Ø
-		my_mem_init(SRAMCCM);	//³õÊ¼»¯CCMÄÚ´æ³Ø
-		exfuns_init();				//ÎªfatfsÏà¹Ø±äÁ¿ÉêÇëÄÚ´æ  
-		f_mount(fs[0],"0:",1); //¹ÒÔØSD¿¨
-		esp8266_Init();			//esp8266³õÊ¼»¯
-		memset(inputstr,0,7);	//È«²¿ÇåÁã
-		inputlen=0;				//ÊäÈë³¤¶ÈÎª0
+		tp_dev.init();			//è§¦æ‘¸å±åˆå§‹åŒ–
+//		SD_Init();					//åˆå§‹åŒ–SDIOæ¥å£
+		my_mem_init(SRAMIN);	//åˆå§‹åŒ–å†…éƒ¨å†…å­˜æ± 
+		my_mem_init(SRAMCCM);	//åˆå§‹åŒ–CCMå†…å­˜æ± 
+		exfuns_init();				//ä¸ºfatfsç›¸å…³å˜é‡ç”³è¯·å†…å­˜  
+		f_mount(fs[0],"0:",1); //æŒ‚è½½SDå¡
+		esp8266_Init();			//esp8266åˆå§‹åŒ–
+		memset(inputstr,0,7);	//å…¨éƒ¨æ¸…é›¶
+		inputlen=0;				//è¾“å…¥é•¿åº¦ä¸º0
 //		piclib_init();
 
-//		res=f_opendir(&picdir,(const TCHAR*)"0:/PICTURE"); 	//´ò¿ªÄ¿Â¼
+//		res=f_opendir(&picdir,(const TCHAR*)"0:/PICTURE"); 	//æ‰“å¼€ç›®å½•
 //		if(res==FR_OK)
 //		{
 //			LCD_Clear(BLACK);
@@ -77,25 +77,25 @@ int main(void)
 		TIM3_Int_Init(5000-1,8400-1);
 		TIM4_Int_Init(5000-1,8400-1);
 		USART2_RX_STA = 0;
-		cleanReceiveData();		//Çå¿Õ½ÓÊÕÊı¾İ»º´æ
+		cleanReceiveData();		//æ¸…ç©ºæ¥æ”¶æ•°æ®ç¼“å­˜
 		start_flag = 1;
 		dht11_flag = 1;
 		msg_flag = 0;
 	
 		while(1)
 		{
-				//¶ÁÈ¡ÆÁÄ»¼üÅÌÊäÈë
+				//è¯»å–å±å¹•é”®ç›˜è¾“å…¥
 				key = get_keynum(20,60);
 				if(key)
 				{
-						TIM_Cmd(TIM3, DISABLE);  //Ê¹ÄÜTIMx
+						TIM_Cmd(TIM3, DISABLE);  //ä½¿èƒ½TIMx
 						TIM_SetCounter(TIM3, 0);
 //						printf("key:%d\r\n",key);
-						//»ØÍË
+						//å›é€€
 						if(key==4)
 						{
 							if(inputlen)inputlen--;
-							inputstr[inputlen]='\0';//Ìí¼Ó½áÊø·û
+							inputstr[inputlen]='\0';//æ·»åŠ ç»“æŸç¬¦
 						}
 						else if(key==13)
 						{
@@ -111,7 +111,7 @@ int main(void)
 //							printf("%s\r\n",past);
 							if(sendAT(past,"OK",2000)==0)
 							{
-									printf("·şÎñÆ÷Á¬½Ó³É¹¦\r\n");
+									printf("æœåŠ¡å™¨è¿æ¥æˆåŠŸ\r\n");
 									LED0 = 0;
 									connect_state = 0;
 									sprintf(past,"@D1%04d",Device_ID);
@@ -128,15 +128,15 @@ int main(void)
 							}
 							else
 							{
-								printf("·şÎñÆ÷Á¬½ÓÊ§°Ü\r\n");
+								printf("æœåŠ¡å™¨è¿æ¥å¤±è´¥\r\n");
 								LED0 = 1;
 								connect_state = 1;
 							}
 							delay_ms(1000);
-							cleanReceiveData();		//Çå¿Õ½ÓÊÕÊı¾İ»º´æ
+							cleanReceiveData();		//æ¸…ç©ºæ¥æ”¶æ•°æ®ç¼“å­˜
 							start_flag = 1;
 						}
-						//È·ÈÏ
+						//ç¡®è®¤
 						else if(key==12&&inputlen==6)
 						{
 							char past[50];
@@ -153,28 +153,28 @@ int main(void)
 							delay_ms(15);
 							inputlen = 0;
 //							inputstr[inputlen]='\0';
-							memset(inputstr,0,7);	//È«²¿ÇåÁã
+							memset(inputstr,0,7);	//å…¨éƒ¨æ¸…é›¶
 						}
-						//È¡Ïû
+						//å–æ¶ˆ
 						else if(key==8)
 						{
 							inputlen = 0;
 //							inputstr[inputlen]='\0';
-							memset(inputstr,0,7);	//È«²¿ÇåÁã
+							memset(inputstr,0,7);	//å…¨éƒ¨æ¸…é›¶
 						}
-						//ÊäÈëÃÜÂë
+						//è¾“å…¥å¯†ç 
 						else if((key%4)<4&&inputlen<6&&key!=14)
 						{
 							switch(key/4)
 							{
 								case 0:
-									inputstr[inputlen]=str[key];//ÊäÈë×Ö·û
+									inputstr[inputlen]=str[key];//è¾“å…¥å­—ç¬¦
 								break;
 								case 1:
-									inputstr[inputlen]=str[3+key%4];//ÊäÈë×Ö·û
+									inputstr[inputlen]=str[3+key%4];//è¾“å…¥å­—ç¬¦
 								break;
 								case 2:
-									inputstr[inputlen]=str[6+key%4];//ÊäÈë×Ö·û
+									inputstr[inputlen]=str[6+key%4];//è¾“å…¥å­—ç¬¦
 								break;
 								default:
 									continue;
@@ -185,7 +185,7 @@ int main(void)
 								inputstr[inputlen]='\0';
 							}
 						}
-						//ÊäÈë0×Ö·û
+						//è¾“å…¥0å­—ç¬¦
 						else if(key==14&&inputlen<6)
 						{
 							inputstr[inputlen] = '0';
@@ -197,20 +197,20 @@ int main(void)
 						}
 						LCD_Fill(25,30,125,50,WHITE);
 						Show_Str(25,30,100,16,inputstr,16,1);
-						TIM_Cmd(TIM3, ENABLE);  //Ê¹ÄÜTIMx
+						TIM_Cmd(TIM3, ENABLE);  //ä½¿èƒ½TIMx
 				}
-				//½ÓÊÕ·şÎñÆ÷ĞÅÏ¢
+				//æ¥æ”¶æœåŠ¡å™¨ä¿¡æ¯
 				if(USART2_RX_STA&&msg_flag==1)
 				{
 						USART2_RX_STA = 0;
 						msg_flag = 0;
 						LED1 = 0;
-						TIM_Cmd(TIM3, DISABLE);  //Ê¹ÄÜTIMx
+						TIM_Cmd(TIM3, DISABLE);  //ä½¿èƒ½TIMx
 						TIM_SetCounter(TIM3, 0);
 						printf("%s\r\n",USART2_RX_BUF);
 						decodeData();
 						cleanReceiveData();
-						TIM_Cmd(TIM3, ENABLE);  //Ê¹ÄÜTIMx
+						TIM_Cmd(TIM3, ENABLE);  //ä½¿èƒ½TIMx
 				}
 				else if(USART2_RX_STA)
 				{
@@ -218,7 +218,7 @@ int main(void)
 						printf("%s",USART2_RX_BUF);
 						sendBack(CMD_ONLINE,0);
 				}
-				//¶¨Ê±¶ÁÈ¡ÎÂÊª¶È
+				//å®šæ—¶è¯»å–æ¸©æ¹¿åº¦
 				if(dht11_flag==1)
 				{
 						dht11_flag = 0;
@@ -250,7 +250,7 @@ int main(void)
 								esp_flag = 1;
 						}
 				}
-				//¶¨Ê±¼ì²éÍøÂç×´Ì¬
+				//å®šæ—¶æ£€æŸ¥ç½‘ç»œçŠ¶æ€
 				if(esp_flag==1)
 				{
 						esp_flag = 0;
