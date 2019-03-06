@@ -16,19 +16,19 @@
 
 FIL fdsts_recive;
 UINT readnum;
-u8 connect_state;		//·şÎñÆ÷Á¬½Ó×´Ì¬£º0£ºÒÑÁ¬½Ó£¬1£º¶Ï¿ª
+u8 connect_state;		//æœåŠ¡å™¨è¿æ¥çŠ¶æ€ï¼š0ï¼šå·²è¿æ¥ï¼Œ1ï¼šæ–­å¼€
 u8 start_flag = 0;
 
-//´®¿Ú½ÓÊÕ»º´æÇø
-u8 USART2_RX_BUF[USART2_MAX_RECV_LEN]; 			//½ÓÊÕ»º³å,×î´óUSART2_MAX_RECV_LEN¸ö×Ö½Ú.
-u8 USART2_TX_BUF[USART2_MAX_SEND_LEN]; 			//·¢ËÍ»º³å,×î´óUSART2_MAX_SEND_LEN×Ö½Ú
+//ä¸²å£æ¥æ”¶ç¼“å­˜åŒº
+u8 USART2_RX_BUF[USART2_MAX_RECV_LEN]; 			//æ¥æ”¶ç¼“å†²,æœ€å¤§USART2_MAX_RECV_LENä¸ªå­—èŠ‚.
+u8 USART2_TX_BUF[USART2_MAX_SEND_LEN]; 			//å‘é€ç¼“å†²,æœ€å¤§USART2_MAX_SEND_LENå­—èŠ‚
 
-//Í¨¹ıÅĞ¶Ï½ÓÊÕÁ¬Ğø2¸ö×Ö·ûÖ®¼äµÄÊ±¼ä²î²»´óÓÚ10msÀ´¾ö¶¨ÊÇ²»ÊÇÒ»´ÎÁ¬ĞøµÄÊı¾İ.
-//Èç¹û2¸ö×Ö·û½ÓÊÕ¼ä¸ô³¬¹ı10ms,ÔòÈÏÎª²»ÊÇ1´ÎÁ¬ĞøÊı¾İ.Ò²¾ÍÊÇ³¬¹ı10msÃ»ÓĞ½ÓÊÕµ½
-//ÈÎºÎÊı¾İ,Ôò±íÊ¾´Ë´Î½ÓÊÕÍê±Ï.
-//½ÓÊÕµ½µÄÊı¾İ×´Ì¬
-//[15]:0,Ã»ÓĞ½ÓÊÕµ½Êı¾İ;1,½ÓÊÕµ½ÁËÒ»ÅúÊı¾İ.
-//[14:0]:½ÓÊÕµ½µÄÊı¾İ³¤¶È
+//é€šè¿‡åˆ¤æ–­æ¥æ”¶è¿ç»­2ä¸ªå­—ç¬¦ä¹‹é—´çš„æ—¶é—´å·®ä¸å¤§äº10msæ¥å†³å®šæ˜¯ä¸æ˜¯ä¸€æ¬¡è¿ç»­çš„æ•°æ®.
+//å¦‚æœ2ä¸ªå­—ç¬¦æ¥æ”¶é—´éš”è¶…è¿‡10ms,åˆ™è®¤ä¸ºä¸æ˜¯1æ¬¡è¿ç»­æ•°æ®.ä¹Ÿå°±æ˜¯è¶…è¿‡10msæ²¡æœ‰æ¥æ”¶åˆ°
+//ä»»ä½•æ•°æ®,åˆ™è¡¨ç¤ºæ­¤æ¬¡æ¥æ”¶å®Œæ¯•.
+//æ¥æ”¶åˆ°çš„æ•°æ®çŠ¶æ€
+//[15]:0,æ²¡æœ‰æ¥æ”¶åˆ°æ•°æ®;1,æ¥æ”¶åˆ°äº†ä¸€æ‰¹æ•°æ®.
+//[14:0]:æ¥æ”¶åˆ°çš„æ•°æ®é•¿åº¦
 vu16 USART2_RX_STA=0;
 
 void usart2_Init(u32 bound)
@@ -37,57 +37,57 @@ void usart2_Init(u32 bound)
 		GPIO_InitTypeDef GPIO_InitStructure;
 		USART_InitTypeDef USART_InitStructure;
 		
-		RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA,ENABLE); //Ê¹ÄÜGPIOBÊ±ÖÓ
-		RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2,ENABLE);//Ê¹ÄÜUSART3Ê±ÖÓ
+		RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA,ENABLE); //ä½¿èƒ½GPIOBæ—¶é’Ÿ
+		RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2,ENABLE);//ä½¿èƒ½USART3æ—¶é’Ÿ
 
-    USART_DeInit(USART2);  //¸´Î»´®¿Ú2
+    USART_DeInit(USART2);  //å¤ä½ä¸²å£2
 	
-		GPIO_PinAFConfig(GPIOA,GPIO_PinSource2,GPIO_AF_USART2); //GPIOB11¸´ÓÃÎªUSART3
-		GPIO_PinAFConfig(GPIOA,GPIO_PinSource3,GPIO_AF_USART2); //GPIOB10¸´ÓÃÎªUSART3	
+		GPIO_PinAFConfig(GPIOA,GPIO_PinSource2,GPIO_AF_USART2); //GPIOB11å¤ç”¨ä¸ºUSART3
+		GPIO_PinAFConfig(GPIOA,GPIO_PinSource3,GPIO_AF_USART2); //GPIOB10å¤ç”¨ä¸ºUSART3	
 		
     //USART2_TX   PA2
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2; //PB10
-		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;//¸´ÓÃ¹¦ÄÜ
-		GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;	//ËÙ¶È50MHz
-		GPIO_InitStructure.GPIO_OType = GPIO_OType_PP; //ÍÆÍì¸´ÓÃÊä³ö
-		GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP; //ÉÏÀ­
-		GPIO_Init(GPIOA,&GPIO_InitStructure); //³õÊ¼»¯GPIOB11£¬ºÍGPIOB10
+		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;//å¤ç”¨åŠŸèƒ½
+		GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;	//é€Ÿåº¦50MHz
+		GPIO_InitStructure.GPIO_OType = GPIO_OType_PP; //æ¨æŒ½å¤ç”¨è¾“å‡º
+		GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP; //ä¸Šæ‹‰
+		GPIO_Init(GPIOA,&GPIO_InitStructure); //åˆå§‹åŒ–GPIOB11ï¼Œå’ŒGPIOB10
 
     //USART2_RX	  PA3
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3;
-		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;//¸´ÓÃ¹¦ÄÜ
-		GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;	//ËÙ¶È50MHz
-		GPIO_InitStructure.GPIO_OType = GPIO_OType_PP; //ÍÆÍì¸´ÓÃÊä³ö
-		GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP; //ÉÏÀ­
-		GPIO_Init(GPIOA,&GPIO_InitStructure); //³õÊ¼»¯GPIOB11£¬ºÍGPIOB10
+		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;//å¤ç”¨åŠŸèƒ½
+		GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;	//é€Ÿåº¦50MHz
+		GPIO_InitStructure.GPIO_OType = GPIO_OType_PP; //æ¨æŒ½å¤ç”¨è¾“å‡º
+		GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP; //ä¸Šæ‹‰
+		GPIO_Init(GPIOA,&GPIO_InitStructure); //åˆå§‹åŒ–GPIOB11ï¼Œå’ŒGPIOB10
 
-    USART_InitStructure.USART_BaudRate = bound;//²¨ÌØÂÊÒ»°ãÉèÖÃÎª9600;
-    USART_InitStructure.USART_WordLength = USART_WordLength_8b;//×Ö³¤Îª8Î»Êı¾İ¸ñÊ½
-    USART_InitStructure.USART_StopBits = USART_StopBits_1;//Ò»¸öÍ£Ö¹Î»
-    USART_InitStructure.USART_Parity = USART_Parity_No;//ÎŞÆæÅ¼Ğ£ÑéÎ»
-    USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;//ÎŞÓ²¼şÊı¾İÁ÷¿ØÖÆ
-    USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;	//ÊÕ·¢Ä£Ê½
+    USART_InitStructure.USART_BaudRate = bound;//æ³¢ç‰¹ç‡ä¸€èˆ¬è®¾ç½®ä¸º9600;
+    USART_InitStructure.USART_WordLength = USART_WordLength_8b;//å­—é•¿ä¸º8ä½æ•°æ®æ ¼å¼
+    USART_InitStructure.USART_StopBits = USART_StopBits_1;//ä¸€ä¸ªåœæ­¢ä½
+    USART_InitStructure.USART_Parity = USART_Parity_No;//æ— å¥‡å¶æ ¡éªŒä½
+    USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;//æ— ç¡¬ä»¶æ•°æ®æµæ§åˆ¶
+    USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;	//æ”¶å‘æ¨¡å¼
 
-    USART_Init(USART2, &USART_InitStructure); //³õÊ¼»¯´®¿Ú	2
+    USART_Init(USART2, &USART_InitStructure); //åˆå§‹åŒ–ä¸²å£	2
 
-    USART_Cmd(USART2, ENABLE);                    //Ê¹ÄÜ´®¿Ú
+    USART_Cmd(USART2, ENABLE);                    //ä½¿èƒ½ä¸²å£
 
-    //Ê¹ÄÜ½ÓÊÕÖĞ¶Ï
-    USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);//¿ªÆôÖĞ¶Ï
+    //ä½¿èƒ½æ¥æ”¶ä¸­æ–­
+    USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);//å¼€å¯ä¸­æ–­
 
-    //ÉèÖÃÖĞ¶ÏÓÅÏÈ¼¶
+    //è®¾ç½®ä¸­æ–­ä¼˜å…ˆçº§
     NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority=0;//ÇÀÕ¼ÓÅÏÈ¼¶0
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;		//×ÓÓÅÏÈ¼¶2
-    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;			//IRQÍ¨µÀÊ¹ÄÜ
-    NVIC_Init(&NVIC_InitStructure);	//¸ù¾İÖ¸¶¨µÄ²ÎÊı³õÊ¼»¯VIC¼Ä´æÆ÷
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority=0;//æŠ¢å ä¼˜å…ˆçº§0
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;		//å­ä¼˜å…ˆçº§2
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;			//IRQé€šé“ä½¿èƒ½
+    NVIC_Init(&NVIC_InitStructure);	//æ ¹æ®æŒ‡å®šçš„å‚æ•°åˆå§‹åŒ–VICå¯„å­˜å™¨
 
-    USART2_RX_STA=0;		//ÇåÁã
+    USART2_RX_STA=0;		//æ¸…é›¶
 
 }
 
-//´®¿Ú2,printf º¯Êı
-//È·±£Ò»´Î·¢ËÍÊı¾İ²»³¬¹ıUSART2_MAX_SEND_LEN×Ö½Ú
+//ä¸²å£2,printf å‡½æ•°
+//ç¡®ä¿ä¸€æ¬¡å‘é€æ•°æ®ä¸è¶…è¿‡USART2_MAX_SEND_LENå­—èŠ‚
 void u2_printf(char* fmt,...)
 {
     u16 i,j;
@@ -95,23 +95,23 @@ void u2_printf(char* fmt,...)
     va_start(ap,fmt);
     vsprintf((char*)USART2_TX_BUF,fmt,ap);
     va_end(ap);
-    i=strlen((const char*)USART2_TX_BUF);		//´Ë´Î·¢ËÍÊı¾İµÄ³¤¶È
-    for(j=0; j<i; j++)							//Ñ­»··¢ËÍÊı¾İ
+    i=strlen((const char*)USART2_TX_BUF);		//æ­¤æ¬¡å‘é€æ•°æ®çš„é•¿åº¦
+    for(j=0; j<i; j++)							//å¾ªç¯å‘é€æ•°æ®
     {
-        while(USART_GetFlagStatus(USART2,USART_FLAG_TC)==RESET); //Ñ­»··¢ËÍ,Ö±µ½·¢ËÍÍê±Ï
+        while(USART_GetFlagStatus(USART2,USART_FLAG_TC)==RESET); //å¾ªç¯å‘é€,ç›´åˆ°å‘é€å®Œæ¯•
         USART_SendData(USART2,USART2_TX_BUF[j]);
     }
 }
 
 u8 msg_flag;
-//´®¿Ú2ÖĞ¶Ï·şÎñº¯Êı
+//ä¸²å£2ä¸­æ–­æœåŠ¡å‡½æ•°
 void USART2_IRQHandler(void)
 {
 	u8 res;
-	if(USART_GetITStatus(USART2, USART_IT_RXNE) != RESET)//½ÓÊÕµ½Êı¾İ
+	if(USART_GetITStatus(USART2, USART_IT_RXNE) != RESET)//æ¥æ”¶åˆ°æ•°æ®
 	{
 		res =USART_ReceiveData(USART2);
-		if((USART2_RX_STA&(1<<15))==0)//½ÓÊÕÍêµÄÒ»ÅúÊı¾İ,»¹Ã»ÓĞ±»´¦Àí,Ôò²»ÔÙ½ÓÊÕÆäËûÊı¾İ
+		if((USART2_RX_STA&(1<<15))==0)//æ¥æ”¶å®Œçš„ä¸€æ‰¹æ•°æ®,è¿˜æ²¡æœ‰è¢«å¤„ç†,åˆ™ä¸å†æ¥æ”¶å…¶ä»–æ•°æ®
 		{
 			if(start_flag==0)
 			{
@@ -137,79 +137,79 @@ void USART2_IRQHandler(void)
 	}
 }
 
-//·¢ËÍÒ»ÌõATÖ¸Áî£¬²¢¼ì²âÊÇ·ñÊÕµ½Ö¸¶¨µÄÓ¦´ğ
-//*sndStr:·¢ËÍµÄÃüÁî×Ö·û´®,µ±sendStr<0XFFµÄÊ±ºò,·¢ËÍÊı×Ö(±ÈÈç·¢ËÍ0X1A),´óÓÚµÄÊ±ºò·¢ËÍ×Ö·û´®.
-//*searchStr:ÆÚ´ıµÄÓ¦´ğ½á¹û,Èç¹ûÎª¿Õ,Ôò±íÊ¾²»ĞèÒªµÈ´ıÓ¦´ğ
-//outTime:µÈ´ıÊ±¼ä(µ¥Î»:1ms)
-//·µ»ØÖµ:0,·¢ËÍ³É¹¦(µÃµ½ÁËÆÚ´ıµÄÓ¦´ğ½á¹û)
-//       -1,·¢ËÍÊ§°Ü
+//å‘é€ä¸€æ¡ATæŒ‡ä»¤ï¼Œå¹¶æ£€æµ‹æ˜¯å¦æ”¶åˆ°æŒ‡å®šçš„åº”ç­”
+//*sndStr:å‘é€çš„å‘½ä»¤å­—ç¬¦ä¸²,å½“sendStr<0XFFçš„æ—¶å€™,å‘é€æ•°å­—(æ¯”å¦‚å‘é€0X1A),å¤§äºçš„æ—¶å€™å‘é€å­—ç¬¦ä¸².
+//*searchStr:æœŸå¾…çš„åº”ç­”ç»“æœ,å¦‚æœä¸ºç©º,åˆ™è¡¨ç¤ºä¸éœ€è¦ç­‰å¾…åº”ç­”
+//outTime:ç­‰å¾…æ—¶é—´(å•ä½:1ms)
+//è¿”å›å€¼:0,å‘é€æˆåŠŸ(å¾—åˆ°äº†æœŸå¾…çš„åº”ç­”ç»“æœ)
+//       -1,å‘é€å¤±è´¥
 s8 sendAT(char *sendStr,char *searchStr,u32 outTime)
 {
     u16 i;
     s8 ret = 0;
     char * res =0;
 //	outTime=outTime/10;
-    cleanReceiveData();//Çå³ı½ÓÊÕÆ÷
+    cleanReceiveData();//æ¸…é™¤æ¥æ”¶å™¨
     if((u32)sendStr < 0xFF)
     {
-        while((USART2->SR&0X40)==0);//µÈ´ıÉÏÒ»´ÎÊı¾İ·¢ËÍÍê³É
+        while((USART2->SR&0X40)==0);//ç­‰å¾…ä¸Šä¸€æ¬¡æ•°æ®å‘é€å®Œæˆ
         USART2->DR=(u32)sendStr;
     }
     else
     {
-        u2_printf(sendStr);//·¢ËÍATÖ¸Áî
-        u2_printf("\r\n");//·¢ËÍ»Ø³µ»»ĞĞ
+        u2_printf(sendStr);//å‘é€ATæŒ‡ä»¤
+        u2_printf("\r\n");//å‘é€å›è½¦æ¢è¡Œ
     }
 		delay_us(500);
-    if(searchStr && outTime)//µ±searchStrºÍoutTime²»Îª0Ê±²ÅµÈ´ıÓ¦´ğ
+    if(searchStr && outTime)//å½“searchStrå’ŒoutTimeä¸ä¸º0æ—¶æ‰ç­‰å¾…åº”ç­”
     {
-        while((--outTime)&&(res == 0))//µÈ´ıÖ¸¶¨µÄÓ¦´ğ»ò³¬Ê±Ê±¼äµ½À´
+        while((--outTime)&&(res == 0))//ç­‰å¾…æŒ‡å®šçš„åº”ç­”æˆ–è¶…æ—¶æ—¶é—´åˆ°æ¥
         {
             res = my_strstr((char *)USART2_RX_BUF,searchStr);
             if(res!=0)
                 break;
-            if((i==USART2_MAX_RECV_LEN)||res!=0)		//iºÎÓÃ£¿£¿£¿
+            if((i==USART2_MAX_RECV_LEN)||res!=0)		//iä½•ç”¨ï¼Ÿï¼Ÿï¼Ÿ
                 break;
             delay_ms(1);
         }
         if(outTime == 0)
         {
-            ret = -1;    //³¬Ê±
+            ret = -1;    //è¶…æ—¶
         }
-        if(res != 0)//res²»Îª0Ö¤Ã÷ÊÕµ½Ö¸¶¨Ó¦´ğ
+        if(res != 0)//resä¸ä¸º0è¯æ˜æ”¶åˆ°æŒ‡å®šåº”ç­”
         {
             ret = 0;
         }
     }
 		printf("%s",USART2_RX_BUF);
     delay_ms(50);
-		cleanReceiveData();		//Çå¿Õ½ÓÊÕÊı¾İ»º´æ
+		cleanReceiveData();		//æ¸…ç©ºæ¥æ”¶æ•°æ®ç¼“å­˜
     return ret;
 }
 
-//Çå³ı½ÓÊÕÆ÷
-//²ÎÊı£ºÎŞ
-//·µ»ØÖµ ÎŞ
+//æ¸…é™¤æ¥æ”¶å™¨
+//å‚æ•°ï¼šæ— 
+//è¿”å›å€¼ æ— 
 void cleanReceiveData(void)
 {
     u16 i;
-    USART2_RX_STA=0;			//½ÓÊÕ¼ÆÊıÆ÷ÇåÁã
+    USART2_RX_STA=0;			//æ¥æ”¶è®¡æ•°å™¨æ¸…é›¶
     for(i = 0; i < USART2_MAX_RECV_LEN; i++)
     {
         USART2_RX_BUF[i] = 0;
     }
 }
 
-//ÔÚ´®¿Ú½ÓÊÕµÄ×Ö·û´®ÖĞËÑË÷
-//·µ»ØÖµ		³É¹¦·µ»Ø±»²éÕÒ×Ö·û´®µÄÊ×µØÖ·
-//				Ê§°Ü·µ»Ø 0
-//ÓĞÒ»¶¨µÄBUG£¬ÔÚ½ÓÊÕÊı¾İÖĞ´æÔÚ0£¬½«»áÍ£Ö¹²éÕÒ
+//åœ¨ä¸²å£æ¥æ”¶çš„å­—ç¬¦ä¸²ä¸­æœç´¢
+//è¿”å›å€¼		æˆåŠŸè¿”å›è¢«æŸ¥æ‰¾å­—ç¬¦ä¸²çš„é¦–åœ°å€
+//				å¤±è´¥è¿”å› 0
+//æœ‰ä¸€å®šçš„BUGï¼Œåœ¨æ¥æ”¶æ•°æ®ä¸­å­˜åœ¨0ï¼Œå°†ä¼šåœæ­¢æŸ¥æ‰¾
 char * my_strstr(char *FirstAddr,char *searchStr)
 {
 
     char * ret = 0;
 
-//    if((u3_data_Pack.USART1_RX_STA&(1<<15))!=0)	//½ÓÊÕÍê³É
+//    if((u3_data_Pack.USART1_RX_STA&(1<<15))!=0)	//æ¥æ”¶å®Œæˆ
 //    {
 //    if((u3_data_Pack.USART3_RX_STA|(0x8FFF)) >= USART3_MAX_RECV_LEN)
 //    {
@@ -225,11 +225,11 @@ char * my_strstr(char *FirstAddr,char *searchStr)
     return 0;
 }
 
-//¼ì²âÍøÂç×´Ì¬
+//æ£€æµ‹ç½‘ç»œçŠ¶æ€
 void Check_Status(void)
 {
 		u8 state;
-		printf("¿ªÊ¼¼ì²âÍøÂç×´Ì¬\r\n");
+		printf("å¼€å§‹æ£€æµ‹ç½‘ç»œçŠ¶æ€\r\n");
 		if(sendAT("AT","OK",1000)==0)
 		{
 				u2_printf("AT+CIPSTATUS\r\n");
@@ -237,30 +237,30 @@ void Check_Status(void)
 				printf("%s",USART2_RX_BUF);
 				printf("%c",USART2_RX_BUF[7]);
 				state = USART2_RX_BUF[7] - '0';
-				printf("ÍøÂç×´Ì¬£º%d\r\n",state);
+				printf("ç½‘ç»œçŠ¶æ€ï¼š%d\r\n",state);
 				switch(state)
 				{
 						case 2:	
-							printf("ÒÑÁ¬½ÓÂ·ÓÉÆ÷£¬Î´Á¬½Ó·şÎñÆ÷\r\n");
+							printf("å·²è¿æ¥è·¯ç”±å™¨ï¼Œæœªè¿æ¥æœåŠ¡å™¨\r\n");
 							connect_state = 1;
 							LED0 = 1;
 						break;
 						case 3:
-							printf("ÒÑÁ¬½Ó·şÎñÆ÷\r\n");
+							printf("å·²è¿æ¥æœåŠ¡å™¨\r\n");
 							connect_state = 0;
 						break;
 						case 4:
-							printf("Óë·şÎñÆ÷¶Ï¿ªÁ¬½Ó\r\n");
+							printf("ä¸æœåŠ¡å™¨æ–­å¼€è¿æ¥\r\n");
 							connect_state = 1;
 							LED0 = 1;
 						break;
 						case 5:
-							printf("ÓëÂ·ÓÉÆ÷¶Ï¿ªÁ¬½Ó\r\n");
+							printf("ä¸è·¯ç”±å™¨æ–­å¼€è¿æ¥\r\n");
 							connect_state = 2;
 							LED0 = 1;
 						break;
 						default:
-							printf("Î´Öª¹ÊÕÏ\r\n");
+							printf("æœªçŸ¥æ•…éšœ\r\n");
 							connect_state = 3;
 							LED0 = 1;
 						break;
@@ -268,20 +268,18 @@ void Check_Status(void)
 		}
 		else 
 		{
-				printf("ESP8266Ä£¿éÒì³£\r\n");
+				printf("ESP8266æ¨¡å—å¼‚å¸¸\r\n");
 				state = 4;
 		}
-		printf("ÍøÂç×´Ì¬¼ì²âÍê±Ï\r\n");
+		printf("ç½‘ç»œçŠ¶æ€æ£€æµ‹å®Œæ¯•\r\n");
 		cleanReceiveData();
 }
 
 
-char SSID[] = {"Kiven"};		//Â·ÓÉÆ÷SSID
-char password[] = {"asd123456"};	//Â·ÓÉÆ÷ÃÜÂë
-//char ipaddr[]= {"111.231.90.29"};//IPµØÖ·
-char ipaddr[] = {"47.100.28.6"};
-//char ipaddr[]= {"172.20.10.3"};//IPµØÖ·
-char port[]= {"8086"};				//¶Ë¿ÚºÅ
+char SSID[] = {"*****"};		//è·¯ç”±å™¨SSID
+char password[] = {"********"};	//è·¯ç”±å™¨å¯†ç 
+char ipaddr[] = {"***.***.***.**"};
+char port[]= {"****"};				//ç«¯å£å·
 
 void esp8266_reinit(u8 state)
 {
@@ -296,7 +294,7 @@ void esp8266_reinit(u8 state)
 				case 2:
 					if(sendAT("AT+CWMODE=1","OK",1000)==0)
 					{
-						printf("ÉèÖÃÎªSTAÄ£Ê½\r\n");
+						printf("è®¾ç½®ä¸ºSTAæ¨¡å¼\r\n");
 					}
 					sprintf(past,"AT+CWJAP_DEF=\"%s\",\"%s\"",SSID,password);
 					sendAT(past,"OK",2000);
@@ -305,7 +303,7 @@ void esp8266_reinit(u8 state)
 					
 					if(sendAT(past,"OK",2000)==0)
 					{
-							printf("·şÎñÆ÷Á¬½Ó³É¹¦\r\n");
+							printf("æœåŠ¡å™¨è¿æ¥æˆåŠŸ\r\n");
 							LED0 = 0;
 							connect_state = 0;
 							sprintf(past,"@D1%04d",Device_ID);
@@ -322,56 +320,56 @@ void esp8266_reinit(u8 state)
 					}
 					else
 					{
-						printf("·şÎñÆ÷Á¬½ÓÊ§°Ü\r\n");
+						printf("æœåŠ¡å™¨è¿æ¥å¤±è´¥\r\n");
 						LED0 = 1;
 						connect_state = 1;
 					}
 				case 0:
-					printf("·şÎñÆ÷ÖØÁ¬³É¹¦\r\n");
+					printf("æœåŠ¡å™¨é‡è¿æˆåŠŸ\r\n");
 				break;
 		}
 		cleanReceiveData();
 }
 
-//ESP8266Ä£¿é³õÊ¼»¯
+//ESP8266æ¨¡å—åˆå§‹åŒ–
 void esp8266_Init(void)
 {
 //    u8 i;
 //    s8 ret;
-    char past[50];			//Â·ÓÉÆ÷ĞÅÏ¢
-    usart2_Init(115200);	//³õÊ¼»¯´®¿Ú2²¨ÌØÂÊÎª9600
-    cleanReceiveData();		//Çå¿Õ½ÓÊÕÊı¾İ»º´æ
+    char past[50];			//è·¯ç”±å™¨ä¿¡æ¯
+    usart2_Init(115200);	//åˆå§‹åŒ–ä¸²å£2æ³¢ç‰¹ç‡ä¸º9600
+    cleanReceiveData();		//æ¸…ç©ºæ¥æ”¶æ•°æ®ç¼“å­˜
     sendAT("AT+RST","ready",3000);
 		LED0 = 1;
     delay_ms(1000);
 		LED0 = 0;
-		printf("¿ªÊ¼³õÊ¼»¯\r\n");
-    delay_ms(1000);		//µÈ´ıÄ£¿éÉÏµçÎÈ¶¨
+		printf("å¼€å§‹åˆå§‹åŒ–\r\n");
+    delay_ms(1000);		//ç­‰å¾…æ¨¡å—ä¸Šç”µç¨³å®š
     
-    printf("³õÊ¼»¯³É¹¦\r\n");
+    printf("åˆå§‹åŒ–æˆåŠŸ\r\n");
 		LCD_ShowString(20,20,200,16,16,"ESP8266 init success!");
 		LED0 = 1;
-		delay_ms(1000);		//µÈ´ıÄ£¿éÉÏµçÎÈ¶¨
+		delay_ms(1000);		//ç­‰å¾…æ¨¡å—ä¸Šç”µç¨³å®š
 		sendAT("ATE0","OK",1000);
 		if(sendAT("ATE0","OK",1000)==0)
 		{
-			printf("¹Ø±Õ»ØÏÔ³É¹¦\r\n");
+			printf("å…³é—­å›æ˜¾æˆåŠŸ\r\n");
 		}
 		if(sendAT("AT+CWMODE=1","OK",1000)==0)
 		{
-			printf("ÉèÖÃÎªSTAÄ£Ê½\r\n");
+			printf("è®¾ç½®ä¸ºSTAæ¨¡å¼\r\n");
 		}
 		
 		LCD_ShowString(20,40,200,16,16,(u8 *)"ESP8266 set at STA mode");
 		
-		printf("Á¬½ÓÂ·ÓÉÆ÷³É¹¦\r\n");
+		printf("è¿æ¥è·¯ç”±å™¨æˆåŠŸ\r\n");
 		LCD_ShowString(20,60,200,16,16,(u8 *)"Connected router Succese");
 
 		sprintf((char *)past,"AT+CIPSTART=\"TCP\",\"%s\",%s",ipaddr,port);
 
 		if(sendAT(past,"OK",2000)==0)
 		{
-				printf("·şÎñÆ÷Á¬½Ó³É¹¦\r\n");
+				printf("æœåŠ¡å™¨è¿æ¥æˆåŠŸ\r\n");
 				LED0 = 0;
 				LCD_ShowString(20,80,200,16,16,(u8 *)"Server connected");
 				connect_state = 0;
@@ -389,29 +387,29 @@ void esp8266_Init(void)
 		}
 		else
 		{
-			printf("·şÎñÆ÷Á¬½ÓÊ§°Ü\r\n");
+			printf("æœåŠ¡å™¨è¿æ¥å¤±è´¥\r\n");
 			LED0 = 1;
 			LCD_ShowString(20,80,200,16,16,(u8 *)"Server disconnected");
 			connect_state = 1;
 		}
 		delay_ms(1000);
-		cleanReceiveData();		//Çå¿Õ½ÓÊÕÊı¾İ»º´æ
+		cleanReceiveData();		//æ¸…ç©ºæ¥æ”¶æ•°æ®ç¼“å­˜
 		LCD_Clear(WHITE);
 }
 
 /*********************************************************************
-*¹¦    ÄÜ£º½âÎö½ÓÊÕÊı¾İ
-*Èë¿Ú²ÎÊı£º
-*³ö¿Ú²ÎÊı£º
+*åŠŸ    èƒ½ï¼šè§£ææ¥æ”¶æ•°æ®
+*å…¥å£å‚æ•°ï¼š
+*å‡ºå£å‚æ•°ï¼š
 *********************************************************************/
 void decodeData(void)
 {
 		u8 i,j;
-		int strlen = -1;	//Êı¾İ³¤¶È
-		u8 strbuf[100];		//Êı¾İ»º´æ
+		int strlen = -1;	//æ•°æ®é•¿åº¦
+		u8 strbuf[100];		//æ•°æ®ç¼“å­˜
 		for(i=0;USART2_RX_BUF[i]!='\0';i++)
 		{
-				//ÕÒµ½Êı¾İÍ·
+				//æ‰¾åˆ°æ•°æ®å¤´
 				if(USART2_RX_BUF[i]=='@'&&strlen<0)
 				{
 						strlen = i;
@@ -438,10 +436,10 @@ void decodeData(void)
 		{
 				if(f_open(&fdsts_recive,"Receive.txt",FA_WRITE|FA_CREATE_ALWAYS)==FR_OK)
 				{
-						f_lseek(&fdsts_recive,0);                         				 //ÒÆ¶¯ÎÄ¼şÖ¸Õë
-						f_write(&fdsts_recive,strbuf,j,&readnum);		 //ÃüÁî
+						f_lseek(&fdsts_recive,0);                         				 //ç§»åŠ¨æ–‡ä»¶æŒ‡é’ˆ
+						f_write(&fdsts_recive,strbuf,j,&readnum);		 //å‘½ä»¤
 						f_close(&fdsts_recive);
-						printf("³É¹¦Ğ´ÈëÊı¾İ\r\n");
+						printf("æˆåŠŸå†™å…¥æ•°æ®\r\n");
 				}
 				switch_CMD();
 		}
@@ -453,13 +451,13 @@ void decodeData(void)
 				delay_ms(50);
 				LED1 = 1;
 		}
-		cleanReceiveData();		//Çå¿Õ½ÓÊÕÊı¾İ»º´æ
+		cleanReceiveData();		//æ¸…ç©ºæ¥æ”¶æ•°æ®ç¼“å­˜
 }
 
 /*********************************************************************
-*¹¦    ÄÜ£º·¢ËÍ»Ø¸´Ó¦´ğ
-*Èë¿Ú²ÎÊı£º
-*³ö¿Ú²ÎÊı£º
+*åŠŸ    èƒ½ï¼šå‘é€å›å¤åº”ç­”
+*å…¥å£å‚æ•°ï¼š
+*å‡ºå£å‚æ•°ï¼š
 *********************************************************************/
 void sendBack(u8 CMD_TYPE,u8 error)
 {
@@ -486,24 +484,24 @@ void sendBack(u8 CMD_TYPE,u8 error)
 }
 
 /*********************************************************************
-*¹¦    ÄÜ£ºÇå¿ÕSD¿¨»º´æĞÅÏ¢
-*Èë¿Ú²ÎÊı£º
-*³ö¿Ú²ÎÊı£º
+*åŠŸ    èƒ½ï¼šæ¸…ç©ºSDå¡ç¼“å­˜ä¿¡æ¯
+*å…¥å£å‚æ•°ï¼š
+*å‡ºå£å‚æ•°ï¼š
 *********************************************************************/
 void ClearnSDCache(void)
 {
     if(f_open(&fdsts_recive,"Receive.txt",FA_WRITE)==FR_OK)
     {
-        f_lseek(&fdsts_recive,0);           //ÒÆ¶¯ÎÄ¼şÖ¸Õë
-        f_truncate(&fdsts_recive);			//½Ø¶ÏÎÄ¼ş
+        f_lseek(&fdsts_recive,0);           //ç§»åŠ¨æ–‡ä»¶æŒ‡é’ˆ
+        f_truncate(&fdsts_recive);			//æˆªæ–­æ–‡ä»¶
         f_close(&fdsts_recive);
     }
 }
 
 /*********************************************************************
-*¹¦    ÄÜ£º·¢ËÍÔÚÏßÓ¦´ğ
-*Èë¿Ú²ÎÊı£º
-*³ö¿Ú²ÎÊı£º
+*åŠŸ    èƒ½ï¼šå‘é€åœ¨çº¿åº”ç­”
+*å…¥å£å‚æ•°ï¼š
+*å‡ºå£å‚æ•°ï¼š
 *********************************************************************/
 void SendOnline(void)
 {
@@ -512,8 +510,8 @@ void SendOnline(void)
 		memset(device_id,0,6);
 		if(f_open(&fdsts_recive,"Receive.txt",FA_READ)==FR_OK)
     {
-        f_lseek(&fdsts_recive,3);                          			//ÒÆ¶¯ÎÄ¼şÖ¸Õë
-        f_read(&fdsts_recive,device_id,4,&readnum);	//¶ÁÈ¡Éè¶¨Ê±¼ä
+        f_lseek(&fdsts_recive,3);                          			//ç§»åŠ¨æ–‡ä»¶æŒ‡é’ˆ
+        f_read(&fdsts_recive,device_id,4,&readnum);	//è¯»å–è®¾å®šæ—¶é—´
         f_close(&fdsts_recive);
     }
 //		printf("device_id:%s\r\n",device_id);
@@ -526,7 +524,7 @@ void SendOnline(void)
 		if(device==Device_ID)
 		{
 				LED1 = 1;
-				ClearnSDCache();         /*Çå¿ÕSD¿¨»º´æĞÅÏ¢*/
+				ClearnSDCache();         /*æ¸…ç©ºSDå¡ç¼“å­˜ä¿¡æ¯*/
 				sendBack(CMD_ONLINE,1);
 		}
 		else
@@ -540,10 +538,10 @@ void SendOnline(void)
 }
 
 /*********************************************************************
-*¹¦    ÄÜ£ºÉèÖÃÊ±¼ä
-*Èë¿Ú²ÎÊı£º
-*³ö¿Ú²ÎÊı£º
-*Ê±¼ä£º2015Äê9ÔÂ18ÈÕ 22:12:15
+*åŠŸ    èƒ½ï¼šè®¾ç½®æ—¶é—´
+*å…¥å£å‚æ•°ï¼š
+*å‡ºå£å‚æ•°ï¼š
+*æ—¶é—´ï¼š2015å¹´9æœˆ18æ—¥ 22:12:15
 *********************************************************************/
 void SetTime(void)
 {
@@ -555,19 +553,19 @@ void SetTime(void)
 		u8 device = 0;
 		Union_Time Gettime;
 		memset(Gettime.time_arrary,0,14);
-		memset(device_id,0,6);	//ÇåÁã
-		//¶ÁÈ¡Éè±¸ºÅ
+		memset(device_id,0,6);	//æ¸…é›¶
+		//è¯»å–è®¾å¤‡å·
 		if(f_open(&fdsts_recive,"Receive.txt",FA_READ)==FR_OK)
     {
-        f_lseek(&fdsts_recive,3);                   //ÒÆ¶¯ÎÄ¼şÖ¸Õë
-        f_read(&fdsts_recive,device_id,4,&readnum);	//¶ÁÈ¡Éè¶¨Ê±¼ä
+        f_lseek(&fdsts_recive,3);                   //ç§»åŠ¨æ–‡ä»¶æŒ‡é’ˆ
+        f_read(&fdsts_recive,device_id,4,&readnum);	//è¯»å–è®¾å®šæ—¶é—´
         f_close(&fdsts_recive);
     }
-		//¶ÁÈ¡¿ØÖÆÃüÁî
+		//è¯»å–æ§åˆ¶å‘½ä»¤
 		if(f_open(&fdsts_recive,"Receive.txt",FA_READ)==FR_OK)
     {
-        f_lseek(&fdsts_recive,21);              //ÒÆ¶¯ÎÄ¼şÖ¸Õë
-        f_read(&fdsts_recive,&CMD,1,&readnum);	//¶ÁÈ¡Éè¶¨Ê±¼ä
+        f_lseek(&fdsts_recive,21);              //ç§»åŠ¨æ–‡ä»¶æŒ‡é’ˆ
+        f_read(&fdsts_recive,&CMD,1,&readnum);	//è¯»å–è®¾å®šæ—¶é—´
         f_close(&fdsts_recive);
     }
 		CMD -= '0';
@@ -582,8 +580,8 @@ void SetTime(void)
 		{
 				if(f_open(&fdsts_recive,"Receive.txt",FA_READ)==FR_OK)
 				{
-						f_lseek(&fdsts_recive,7);                          		//ÒÆ¶¯ÎÄ¼şÖ¸Õë
-						f_read(&fdsts_recive,Gettime.time_arrary,14,&readnum);	//¶ÁÈ¡Éè¶¨Ê±¼ä
+						f_lseek(&fdsts_recive,7);                          		//ç§»åŠ¨æ–‡ä»¶æŒ‡é’ˆ
+						f_read(&fdsts_recive,Gettime.time_arrary,14,&readnum);	//è¯»å–è®¾å®šæ—¶é—´
 						f_close(&fdsts_recive);
 				}
 				printf("%s\r\n",Gettime.time_arrary);
@@ -592,7 +590,7 @@ void SetTime(void)
 						Gettime.time_arrary[i] -= 48;
 				}
 				
-				year=(Gettime.TIME.year[0])*1000;     			//¼ÆËãÊ±¼ä
+				year=(Gettime.TIME.year[0])*1000;     			//è®¡ç®—æ—¶é—´
 				year+=(Gettime.TIME.year[1])*100;
 				year+=(Gettime.TIME.year[2])*10;
 				year+=(Gettime.TIME.year[3]);
@@ -620,21 +618,21 @@ void SetTime(void)
 						{
 							case 1:
 							{
-									error = RTC_Set_Time(hour,min,sec,RTC_H12_AM);	//ÉèÖÃÊ±¼ä
+									error = RTC_Set_Time(hour,min,sec,RTC_H12_AM);	//è®¾ç½®æ—¶é—´
 									printf("set-error:%d\r\n",error);
-									error = RTC_Set_Date(year-2000,mon,day,week);		//ÉèÖÃÈÕÆÚ
+									error = RTC_Set_Date(year-2000,mon,day,week);		//è®¾ç½®æ—¥æœŸ
 									printf("set-error:%d\r\n",error);
 									
 									RTC_Get();
 									LED1 = 1;
-									sendBack(CMD_SET_TIME,error);		//·¢ËÍÊ±¼äÉèÖÃÓ¦´ğ
+									sendBack(CMD_SET_TIME,error);		//å‘é€æ—¶é—´è®¾ç½®åº”ç­”
 									break;
 							}
 							case 2:
 							{
-									printf("ÉèÖÃÄÖÖÓA\r\n");
+									printf("è®¾ç½®é—¹é’ŸA\r\n");
 									RTC_Set_AlarmA(week,hour,min,sec);
-									sendBack(CMD_SET_TIME,error);		//·¢ËÍÊ±¼äÉèÖÃÓ¦´ğ
+									sendBack(CMD_SET_TIME,error);		//å‘é€æ—¶é—´è®¾ç½®åº”ç­”
 									break;
 							}
 						}
@@ -647,15 +645,15 @@ void SetTime(void)
 				LED1 = 0;
 				delay_ms(50);
 				LED1 = 1;
-				sendBack(CMD_SET_TIME,0);		//·¢ËÍÊ±¼äÉèÖÃÓ¦´ğ
+				sendBack(CMD_SET_TIME,0);		//å‘é€æ—¶é—´è®¾ç½®åº”ç­”
 		}
-		ClearnSDCache();            								//Çå¿ÕSD¿¨»º´æĞÅÏ¢
+		ClearnSDCache();            								//æ¸…ç©ºSDå¡ç¼“å­˜ä¿¡æ¯
 }
 
 /*********************************************************************
-*¹¦    ÄÜ£º¿ªÃÅÖ¸Áî
-*Èë¿Ú²ÎÊı£º
-*³ö¿Ú²ÎÊı£º
+*åŠŸ    èƒ½ï¼šå¼€é—¨æŒ‡ä»¤
+*å…¥å£å‚æ•°ï¼š
+*å‡ºå£å‚æ•°ï¼š
 *********************************************************************/
 void OpenDoor(void)
 {
@@ -667,8 +665,8 @@ void OpenDoor(void)
 		memset(userid,0,12);
 		if(f_open(&fdsts_recive,"Receive.txt",FA_READ)==FR_OK)
 		{
-				f_lseek(&fdsts_recive,3);                         //ÒÆ¶¯ÎÄ¼şÖ¸Õë
-				f_read(&fdsts_recive,&device_id,4,&readnum);						//¶ÁÈ¡Ö¸Áî
+				f_lseek(&fdsts_recive,3);                         //ç§»åŠ¨æ–‡ä»¶æŒ‡é’ˆ
+				f_read(&fdsts_recive,&device_id,4,&readnum);						//è¯»å–æŒ‡ä»¤
 				f_close(&fdsts_recive);
 		}
 //		printf("%s\r\n",device_id);
@@ -680,11 +678,11 @@ void OpenDoor(void)
 		printf("deviceid:%04d\r\n",device);
 		if(device==Device_ID)
 		{
-				printf("µØÖ·Æ¥Åä³É¹¦\r\n");
+				printf("åœ°å€åŒ¹é…æˆåŠŸ\r\n");
 				if(f_open(&fdsts_recive,"Receive.txt",FA_READ)==FR_OK)
 				{
-						f_lseek(&fdsts_recive,18);                         //ÒÆ¶¯ÎÄ¼şÖ¸Õë
-						f_read(&fdsts_recive,&CMD,1,&readnum);						//¶ÁÈ¡Ö¸Áî
+						f_lseek(&fdsts_recive,18);                         //ç§»åŠ¨æ–‡ä»¶æŒ‡é’ˆ
+						f_read(&fdsts_recive,&CMD,1,&readnum);						//è¯»å–æŒ‡ä»¤
 						f_close(&fdsts_recive);
 				}
 				CMD -= '0';
@@ -693,12 +691,12 @@ void OpenDoor(void)
 				printf("CMD:%d\r\n",CMD);
 				switch(CMD)
 				{
-						case 0:		//Õı³£¿ªÃÅ
+						case 0:		//æ­£å¸¸å¼€é—¨
 						{
 								if(f_open(&fdsts_recive,"Receive.txt",FA_READ)==FR_OK)
 								{
-										f_lseek(&fdsts_recive,7);                         //ÒÆ¶¯ÎÄ¼şÖ¸Õë
-										f_read(&fdsts_recive,&userid,11,&readnum);						//¶ÁÈ¡Ö¸Áî
+										f_lseek(&fdsts_recive,7);                         //ç§»åŠ¨æ–‡ä»¶æŒ‡é’ˆ
+										f_read(&fdsts_recive,&userid,11,&readnum);						//è¯»å–æŒ‡ä»¤
 										f_close(&fdsts_recive);
 								}
 								DS0 = 1;
@@ -706,55 +704,55 @@ void OpenDoor(void)
 								DR0 = 0;
 								TIM_Cmd(TIM4, ENABLE);
 								printf("userid:%s\r\n",userid);
-								printf("Õı³£¿ªÃÅ\r\n");
+								printf("æ­£å¸¸å¼€é—¨\r\n");
 								LCD_Fill(230,150,320,180,WHITE);
-								Show_Str(230,150,100,16,(u8 *)"»¶Ó­¹âÁÙ£¡",16,0);
+								Show_Str(230,150,100,16,(u8 *)"æ¬¢è¿å…‰ä¸´ï¼",16,0);
 								sendBack(CMD_OPEN,0);
 								break;
 						}
-						case 1:		//´íÎó´úÂë1--Î´×¢²á
+						case 1:		//é”™è¯¯ä»£ç 1--æœªæ³¨å†Œ
 						{
-								printf("ÉĞÎ´×¢²á\r\n");
+								printf("å°šæœªæ³¨å†Œ\r\n");
 								LCD_Fill(230,150,320,180,WHITE);
-								Show_Str(230,150,100,16,(u8 *)"ÉĞÎ´×¢²á£¡",16,0);
+								Show_Str(230,150,100,16,(u8 *)"å°šæœªæ³¨å†Œï¼",16,0);
 								sendBack(CMD_OPEN,1);
 								break;
 						}
-						case 2:		//´íÎó´úÂë2--Î´Ô¤Ô¼
+						case 2:		//é”™è¯¯ä»£ç 2--æœªé¢„çº¦
 						{
-								printf("ÉĞÎ´Ô¤Ô¼\r\n");
+								printf("å°šæœªé¢„çº¦\r\n");
 								LCD_Fill(230,150,320,180,WHITE);
-								Show_Str(230,150,100,16,(u8 *)"ÉĞÎ´Ô¤Ô¼£¡",16,0);
+								Show_Str(230,150,100,16,(u8 *)"å°šæœªé¢„çº¦ï¼",16,0);
 								sendBack(CMD_OPEN,2);
 								break;
 						}
-						case 3:		//´íÎó´úÂë3--Î´µ½Ô¤Ô¼Ê±¼ä
+						case 3:		//é”™è¯¯ä»£ç 3--æœªåˆ°é¢„çº¦æ—¶é—´
 						{
 								if(f_open(&fdsts_recive,"Receive.txt",FA_READ)==FR_OK)
 								{
-										f_lseek(&fdsts_recive,7);                         //ÒÆ¶¯ÎÄ¼şÖ¸Õë
-										f_read(&fdsts_recive,&userid,11,&readnum);						//¶ÁÈ¡Ö¸Áî
+										f_lseek(&fdsts_recive,7);                         //ç§»åŠ¨æ–‡ä»¶æŒ‡é’ˆ
+										f_read(&fdsts_recive,&userid,11,&readnum);						//è¯»å–æŒ‡ä»¤
 										f_close(&fdsts_recive);
 								}
 								printf("userid:%s\r\n",userid);
-								printf("Î´µ½Ô¤Ô¼Ê±¼ä\r\n");
+								printf("æœªåˆ°é¢„çº¦æ—¶é—´\r\n");
 								LCD_Fill(230,150,320,180,WHITE);
-								Show_Str(230,150,100,16,(u8 *)"Î´µ½Ô¤Ô¼Ê±¼ä£¡",16,0);
+								Show_Str(230,150,100,16,(u8 *)"æœªåˆ°é¢„çº¦æ—¶é—´ï¼",16,0);
 								sendBack(CMD_OPEN,3);
 								break;
 						}
-						case 4:		//´íÎó´úÂë4--ÑéÖ¤Âë¹ıÆÚ
+						case 4:		//é”™è¯¯ä»£ç 4--éªŒè¯ç è¿‡æœŸ
 						{
 								if(f_open(&fdsts_recive,"Receive.txt",FA_READ)==FR_OK)
 								{
-										f_lseek(&fdsts_recive,7);                         //ÒÆ¶¯ÎÄ¼şÖ¸Õë
-										f_read(&fdsts_recive,&userid,11,&readnum);						//¶ÁÈ¡Ö¸Áî
+										f_lseek(&fdsts_recive,7);                         //ç§»åŠ¨æ–‡ä»¶æŒ‡é’ˆ
+										f_read(&fdsts_recive,&userid,11,&readnum);						//è¯»å–æŒ‡ä»¤
 										f_close(&fdsts_recive);
 								}
 								printf("userid:%s\r\n",userid);
-								printf("Ô¤Ô¼ÒÑ¹ıÆÚ\r\n");
+								printf("é¢„çº¦å·²è¿‡æœŸ\r\n");
 								LCD_Fill(230,150,320,180,WHITE);
-								Show_Str(230,150,100,16,(u8 *)"Ô¤Ô¼ÒÑÊ§Ğ§£¡",16,0);
+								Show_Str(230,150,100,16,(u8 *)"é¢„çº¦å·²å¤±æ•ˆï¼",16,0);
 								sendBack(CMD_OPEN,4);
 								break;
 						}
@@ -774,9 +772,9 @@ void OpenDoor(void)
 }
 
 /*********************************************************************
-*¹¦    ÄÜ£ºÉèÖÃÁ¬½ÓWiFi
-*Èë¿Ú²ÎÊı£º
-*³ö¿Ú²ÎÊı£º
+*åŠŸ    èƒ½ï¼šè®¾ç½®è¿æ¥WiFi
+*å…¥å£å‚æ•°ï¼š
+*å‡ºå£å‚æ•°ï¼š
 *********************************************************************/
 void SetNet(void)
 {
@@ -785,8 +783,8 @@ void SetNet(void)
 		memset(device_id,0,4);
 		if(f_open(&fdsts_recive,"Receive.txt",FA_READ)==FR_OK)
 		{	 	
-				f_lseek(&fdsts_recive,3);                         //ÒÆ¶¯ÎÄ¼şÖ¸Õë
-				f_read(&fdsts_recive,&device_id,4,&readnum);						//¶ÁÈ¡Ö¸Áî
+				f_lseek(&fdsts_recive,3);                         //ç§»åŠ¨æ–‡ä»¶æŒ‡é’ˆ
+				f_read(&fdsts_recive,&device_id,4,&readnum);						//è¯»å–æŒ‡ä»¤
 				f_close(&fdsts_recive);
 		}
 		printf("%s\r\n",device_id);
@@ -813,39 +811,39 @@ void SetNet(void)
 }
 
 /*********************************************************************
-*¹¦    ÄÜ£ºÖ¸ÁîÑ¡Ôñ
-*Èë¿Ú²ÎÊı£º
-*³ö¿Ú²ÎÊı£º
+*åŠŸ    èƒ½ï¼šæŒ‡ä»¤é€‰æ‹©
+*å…¥å£å‚æ•°ï¼š
+*å‡ºå£å‚æ•°ï¼š
 *********************************************************************/
 void switch_CMD(void)
 {
     u8 CMD=0;
     if(f_open(&fdsts_recive,"Receive.txt",FA_READ)==FR_OK)
     {
-        f_lseek(&fdsts_recive,2);                         //ÒÆ¶¯ÎÄ¼şÖ¸Õë
-        f_read(&fdsts_recive,&CMD,1,&readnum);						//¶ÁÈ¡Ö¸Áî
+        f_lseek(&fdsts_recive,2);                         //ç§»åŠ¨æ–‡ä»¶æŒ‡é’ˆ
+        f_read(&fdsts_recive,&CMD,1,&readnum);						//è¯»å–æŒ‡ä»¤
         f_close(&fdsts_recive);
     }
 		CMD -= '0';
 //	CMD=CMD_DELETE_PHOTO;
-    switch(CMD)			//Ö¸ÁîÑ¡Ôñ
+    switch(CMD)			//æŒ‡ä»¤é€‰æ‹©
     {
-				case CMD_ONLINE:		{	SendOnline();	break;	}	//·¢ËÍÔÚÏßÓ¦´ğ
-				case CMD_SET_TIME:	{	SetTime();		break;	}	//ÉèÖÃÊ±¼ä
-				case CMD_OPEN:			{	OpenDoor();		break;	}	//¿ªÃÅÖ¸Áî
-				case CMD_CONNECT:		{ SetNet();			break;	}	//ÇĞ»»Á¬½ÓWiFi
-//        case CMD_ADD_USER: 			{   adduser();  		 			break;	} //Ìí¼ÓÓÃ»§
-//        case CMD_DELETE_USER: 	{   deleteuse(); 		 			break; 	}	//É¾³ıÖ¸¶¨ÓÃ»§
-//        case CMD_ONLINE: 				{   Sendonline(); 		 		break; 	}	//·¢ËÍÔÚÏßÁª»úÓ¦´ğ
-//        case CMD_GET_USER_LIST: {   Uploaduserlist(); 	 	break; 	}	//»ñÈ¡ÏÂÎ»»úÓÃ»§ÁĞ±í
-//        case CMD_GET_ALL_LIST:  {   Uploadalluserlist();	break;	}	//»ñÈ¡ÏÂÎ»»úÓÃ»§È«²¿ĞÅÏ¢
-//        case CMD_GET_USER_NUM:	{	 	Uploadusernum();	 		break;	}	//»ñÈ¡ÓÃ»§×ÜÊı
-//        case CMD_SET_TIME :			{   settime();			 			break; 	}	//ÉèÖÃÊ±¼ä
-//        case CMD_GTE_I_O : 			{   Upload_access();	 		break; 	}	//ÉÏ´«¸öÈË½ø³öÃÅĞÅÏ¢
-//				case CMD_SAVE_PHOTO:		{	 	Save_photo();		 			break;	}	//´æ´¢ÕÕÆ¬
-//				case CMD_DELETE_PHOTO:	{	 	deletephoto();		 		break;	}	//É¾³ıÕÕÆ¬
-//				case CMD_MEMBER:				{	 	new_member();		 			break;	}	//ĞÂ½¨ÈËÔ±ĞÅÏ¢
-//				case CMD_CHECK_PHOTO:		{	 	check_photo();		 		break;	}	//²éÑ°Í¼Æ¬ÊÇ·ñ´æÔÚ
+				case CMD_ONLINE:		{	SendOnline();	break;	}	//å‘é€åœ¨çº¿åº”ç­”
+				case CMD_SET_TIME:	{	SetTime();		break;	}	//è®¾ç½®æ—¶é—´
+				case CMD_OPEN:			{	OpenDoor();		break;	}	//å¼€é—¨æŒ‡ä»¤
+				case CMD_CONNECT:		{ SetNet();			break;	}	//åˆ‡æ¢è¿æ¥WiFi
+//        case CMD_ADD_USER: 			{   adduser();  		 			break;	} //æ·»åŠ ç”¨æˆ·
+//        case CMD_DELETE_USER: 	{   deleteuse(); 		 			break; 	}	//åˆ é™¤æŒ‡å®šç”¨æˆ·
+//        case CMD_ONLINE: 				{   Sendonline(); 		 		break; 	}	//å‘é€åœ¨çº¿è”æœºåº”ç­”
+//        case CMD_GET_USER_LIST: {   Uploaduserlist(); 	 	break; 	}	//è·å–ä¸‹ä½æœºç”¨æˆ·åˆ—è¡¨
+//        case CMD_GET_ALL_LIST:  {   Uploadalluserlist();	break;	}	//è·å–ä¸‹ä½æœºç”¨æˆ·å…¨éƒ¨ä¿¡æ¯
+//        case CMD_GET_USER_NUM:	{	 	Uploadusernum();	 		break;	}	//è·å–ç”¨æˆ·æ€»æ•°
+//        case CMD_SET_TIME :			{   settime();			 			break; 	}	//è®¾ç½®æ—¶é—´
+//        case CMD_GTE_I_O : 			{   Upload_access();	 		break; 	}	//ä¸Šä¼ ä¸ªäººè¿›å‡ºé—¨ä¿¡æ¯
+//				case CMD_SAVE_PHOTO:		{	 	Save_photo();		 			break;	}	//å­˜å‚¨ç…§ç‰‡
+//				case CMD_DELETE_PHOTO:	{	 	deletephoto();		 		break;	}	//åˆ é™¤ç…§ç‰‡
+//				case CMD_MEMBER:				{	 	new_member();		 			break;	}	//æ–°å»ºäººå‘˜ä¿¡æ¯
+//				case CMD_CHECK_PHOTO:		{	 	check_photo();		 		break;	}	//æŸ¥å¯»å›¾ç‰‡æ˜¯å¦å­˜åœ¨
 
         default:
 				{
@@ -859,7 +857,7 @@ void switch_CMD(void)
 						break;
 				}
     }
-		ClearnSDCache();            								//Çå¿ÕSD¿¨»º´æĞÅÏ¢
+		ClearnSDCache();            								//æ¸…ç©ºSDå¡ç¼“å­˜ä¿¡æ¯
 }
 
 
